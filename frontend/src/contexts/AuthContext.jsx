@@ -14,12 +14,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Verify token and set user
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // For demo, we'll assume token is valid
-      const userData = JSON.parse(localStorage.getItem('user'));
-      if (userData) {
-        setUser(userData);
+      try {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const rawUser = localStorage.getItem('user');
+        const userData = rawUser ? JSON.parse(rawUser) : null;
+
+        if (userData) {
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Error restoring auth session:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete axios.defaults.headers.common['Authorization'];
       }
     }
     setLoading(false);
@@ -37,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Login failed' };
     }

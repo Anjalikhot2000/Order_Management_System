@@ -27,8 +27,9 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      // Role is automatically determined from the database
-      navigate('/');
+      const role = result.user?.role;
+      if (role === 'admin') navigate('/admin/dashboard');
+      else navigate('/customer/dashboard');
     } else {
       setError(result.message);
     }

@@ -9,6 +9,11 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
     const { name, email, password, role = 'customer' } = req.body;
 
+    const validRoles = ['admin', 'customer'];
+    if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: 'Invalid role' });
+    }
+
     try {
         // Check if user exists
         const [existing] = await db.promise().query('SELECT id FROM users WHERE email = ?', [email]);

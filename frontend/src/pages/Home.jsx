@@ -1,6 +1,38 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Stack,
+  Typography
+} from '@mui/material';
+import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
+import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded';
+import InsightsRoundedIcon from '@mui/icons-material/InsightsRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useAuth } from '../contexts/AuthContext';
+
+const featureCards = [
+  {
+    title: 'Product Operations',
+    description: 'Keep catalogs tidy, inventory visible, and teams aligned with a cleaner product workflow.',
+    icon: <Inventory2RoundedIcon color="primary" />
+  },
+  {
+    title: 'Order Processing',
+    description: 'Track every order from cart to confirmation with structured status updates and quick visibility.',
+    icon: <ReceiptLongRoundedIcon color="primary" />
+  },
+  {
+    title: 'Analytics Overview',
+    description: 'Give admins a professional dashboard experience with key metrics front and center.',
+    icon: <InsightsRoundedIcon color="primary" />
+  }
+];
 
 const Home = () => {
   const { user } = useAuth();
@@ -8,13 +40,9 @@ const Home = () => {
 
   useEffect(() => {
     if (user) {
-      // Automatically redirect to appropriate dashboard based on role
       switch (user.role) {
         case 'admin':
           navigate('/admin/dashboard');
-          break;
-        case 'manager':
-          navigate('/manager/dashboard');
           break;
         case 'customer':
           navigate('/customer/dashboard');
@@ -26,108 +54,131 @@ const Home = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-            Order Management System
-          </h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            A comprehensive solution for managing orders, products, customers, and more.
-          </p>
+    <Box sx={{ py: { xs: 4, md: 7 } }}>
+      <Container maxWidth="xl">
+        <Card
+          sx={{
+            overflow: 'hidden',
+            borderRadius: 6,
+            border: '1px solid rgba(15, 76, 129, 0.12)',
+            background:
+              'linear-gradient(135deg, rgba(10, 51, 87, 0.98), rgba(15, 76, 129, 0.93))'
+          }}
+        >
+          <CardContent sx={{ p: { xs: 3, md: 6 } }}>
+            <div className="container-fluid px-0">
+              <div className="row g-4 align-items-center">
+                <div className="col-lg-7">
+                  <Stack spacing={3}>
+                    <Chip
+                      label="Bootstrap layout + Material UI components"
+                      color="secondary"
+                      sx={{ alignSelf: 'flex-start', fontWeight: 700 }}
+                    />
+                    <Typography variant="h2" sx={{ color: 'white', maxWidth: 760 }}>
+                      Order management that feels polished, clear, and ready for daily operations.
+                    </Typography>
+                    <Typography sx={{ color: 'rgba(255,255,255,0.78)', maxWidth: 640, fontSize: '1.05rem' }}>
+                      Manage products, customer orders, and team dashboards from one professional interface with
+                      better hierarchy, cleaner spacing, and faster navigation.
+                    </Typography>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      {user ? (
+                        <Button
+                          component={Link}
+                          to="/products"
+                          variant="contained"
+                          color="secondary"
+                          size="large"
+                          endIcon={<ArrowForwardRoundedIcon />}
+                        >
+                          Browse Products
+                        </Button>
+                      ) : (
+                        <>
+                          <Button component={Link} to="/login" variant="contained" size="large">
+                            Sign In
+                          </Button>
+                          <Button
+                            component={Link}
+                            to="/register"
+                            variant="outlined"
+                            size="large"
+                            sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.4)' }}
+                          >
+                            Create Account
+                          </Button>
+                        </>
+                      )}
+                    </Stack>
+                  </Stack>
+                </div>
 
-          {user ? (
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-              <div className="rounded-md shadow">
-                <Link
-                  to="/products"
-                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
-                >
-                  Browse Products
-                </Link>
+                <div className="col-lg-5">
+                  <Card sx={{ borderRadius: 5, bgcolor: 'rgba(255,255,255,0.08)', color: 'white' }}>
+                    <CardContent sx={{ p: 4 }}>
+                      <Typography variant="overline" sx={{ letterSpacing: 1.5, opacity: 0.85 }}>
+                        Operations Snapshot
+                      </Typography>
+                      <Stack spacing={2.5} sx={{ mt: 2 }}>
+                        {[
+                          ['Unified catalog control', 'Products, stock, and customer checkout aligned in one flow'],
+                          ['Role-based workspace', 'Focused dashboards for admins and customers'],
+                          ['Order visibility', 'Live status tracking from placement to delivery']
+                        ].map(([title, text]) => (
+                          <Box
+                            key={title}
+                            sx={{
+                              p: 2.5,
+                              borderRadius: 4,
+                              bgcolor: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.08)'
+                            }}
+                          >
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                              {title}
+                            </Typography>
+                            <Typography sx={{ mt: 0.75, color: 'rgba(255,255,255,0.74)' }}>{text}</Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-              <div className="rounded-md shadow">
-                <Link
-                  to="/login"
-                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
-                >
-                  Get Started
-                </Link>
-              </div>
-              <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                <Link
-                  to="/register"
-                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
-                >
-                  Sign Up
-                </Link>
-              </div>
+          </CardContent>
+        </Card>
+
+        <div className="row g-4 mt-1">
+          {featureCards.map((feature) => (
+            <div className="col-md-6 col-xl-4" key={feature.title}>
+              <Card sx={{ height: '100%', borderRadius: 5 }}>
+                <CardContent sx={{ p: 3.5 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      display: 'grid',
+                      placeItems: 'center',
+                      borderRadius: 3,
+                      bgcolor: 'rgba(15, 76, 129, 0.1)',
+                      mb: 2
+                    }}
+                  >
+                    {feature.icon}
+                  </Box>
+                  <Typography variant="h6">{feature.title}</Typography>
+                  <Typography color="text.secondary" sx={{ mt: 1.25 }}>
+                    {feature.description}
+                  </Typography>
+                </CardContent>
+              </Card>
             </div>
-          )}
+          ))}
         </div>
-
-        <div className="mt-16">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="pt-6">
-              <div className="flow-root bg-white rounded-lg px-6 pb-8">
-                <div className="-mt-6">
-                  <div>
-                    <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
-                      <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                      </svg>
-                    </span>
-                  </div>
-                  <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Product Management</h3>
-                  <p className="mt-5 text-base text-gray-500">
-                    Manage your product catalog with ease. Add, edit, and organize products with categories and inventory tracking.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <div className="flow-root bg-white rounded-lg px-6 pb-8">
-                <div className="-mt-6">
-                  <div>
-                    <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
-                      <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </span>
-                  </div>
-                  <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Order Processing</h3>
-                  <p className="mt-5 text-base text-gray-500">
-                    Streamline your order workflow from placement to delivery with comprehensive order management features.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <div className="flow-root bg-white rounded-lg px-6 pb-8">
-                <div className="-mt-6">
-                  <div>
-                    <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
-                      <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </span>
-                  </div>
-                  <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Analytics & Reports</h3>
-                  <p className="mt-5 text-base text-gray-500">
-                    Get insights into your business with comprehensive analytics and reporting tools.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 };
 

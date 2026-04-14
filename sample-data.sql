@@ -143,7 +143,6 @@ INSERT INTO products (name, description, price, category_id, stock_quantity, ima
 -- Insert sample admin user
 INSERT INTO users (name, email, password, role) VALUES
 ('Admin User', 'admin@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin'),
-('Manager User', 'manager@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'manager'),
 ('John Customer', 'john@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'customer');
 
 -- Insert customer profiles

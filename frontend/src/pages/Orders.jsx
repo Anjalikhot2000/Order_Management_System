@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { formatCurrency } from '../components/currency';
 
 const Orders = () => {
   const { user, logout } = useAuth();
@@ -85,13 +86,23 @@ const Orders = () => {
   };
 
   const handleMenuClick = (menu) => {
+    console.log('[Orders] Sidebar click:', menu);
     setActiveMenu(menu);
     switch(menu) {
       case 'Dashboard':
-        navigate('/admin-dashboard');
+        navigate('/admin/dashboard');
         break;
       case 'Products':
         navigate('/products');
+        break;
+      case 'Customers':
+        navigate('/customers');
+        break;
+      case 'Reports':
+        navigate('/reports');
+        break;
+      case 'Settings':
+        navigate('/settings');
         break;
       default:
         break;
@@ -138,16 +149,19 @@ const Orders = () => {
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Customers' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('Customers')}
           >
             👥 Customers
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Reports' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('Reports')}
           >
             📈 Reports
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Settings' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('Settings')}
           >
             ⚙️ Settings
           </button>
@@ -219,7 +233,7 @@ const Orders = () => {
                     <tr key={order.id}>
                       <td className="order-id">#{order.id}</td>
                       <td>{order.customer_name || 'N/A'}</td>
-                      <td className="amount">${parseFloat(order.total_amount).toFixed(2)}</td>
+                      <td className="amount">{formatCurrency(order.total_amount)}</td>
                       <td>
                         <span className={`status-badge ${order.status}`}>
                           {order.status}
@@ -286,7 +300,7 @@ const Orders = () => {
                   </div>
                   <div className="info-item">
                     <label>Amount</label>
-                    <p>${parseFloat(editingOrder.total_amount).toFixed(2)}</p>
+                    <p>{formatCurrency(editingOrder.total_amount)}</p>
                   </div>
                   <div className="info-item">
                     <label>Date</label>

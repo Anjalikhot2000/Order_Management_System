@@ -3,7 +3,7 @@ const db = require('../config/database');
 
 const router = express.Router();
 
-// Get all orders (admin/manager) or user's orders (customer)
+// Get all orders (admin) or user's orders (customer)
 router.get('/', async (req, res) => {
     try {
         let query = `
@@ -67,6 +67,15 @@ router.post('/', async (req, res) => {
     const { items, shipping_address } = req.body;
 
     try {
+        // Check if customer account is blocked
+        const [userRows] = await db.promise().query(
+            'SELECT status FROM users WHERE id = ?',
+            [req.user.id]
+        );
+        if (userRows[0]?.status === 'blocked') {
+            return res.status(403).json({ message: 'Your account has been blocked. You cannot place orders.' });
+        }
+
         // Get customer ID
         const [customers] = await db.promise().query('SELECT id FROM customers WHERE user_id = ?', [req.user.id]);
         if (customers.length === 0) {

@@ -136,7 +136,6 @@ const Register = () => {
                 onChange={handleChange}
               >
                 <option value="customer">Customer</option>
-                <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
