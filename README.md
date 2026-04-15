@@ -73,10 +73,7 @@ npm run dev
 ---
 
 ## 🔑 Default Credentials
-
-| Role | Email | Password |
-|------|------|----------|
-| Admin | admin@shophub.com | admin123 |
+For admin credential mailto:anjalikhot5268@gmail.com
 
 ---
 
