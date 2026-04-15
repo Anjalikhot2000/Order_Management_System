@@ -1,4 +1,4 @@
-## ShopHub — Order Management System
+# 🛍️ ShopHub — Order Management System
 
 > A full-stack e-commerce order management platform with separate Admin and Customer portals, built with React, Node.js, Express, and MySQL.
 
@@ -12,124 +12,57 @@
 
 ## 📌 About the Project
 
-**ShopHub** is a production-ready, full-stack Order Management System designed for e-commerce businesses. It provides a comprehensive **Admin Dashboard** for managing products, customers, and orders, as well as a clean **Customer Portal** for seamless shopping experiences — from browsing to checkout and return tracking.
+ShopHub is a production-ready, full-stack Order Management System designed for e-commerce businesses. It provides a comprehensive Admin Dashboard and a Customer Portal for seamless shopping.
 
 ---
 
 ## ✨ Features
 
 ### 🛠️ Admin Features
-| Feature | Description |
-|---|---|
-| Product Management | Add, edit, and delete products with images and categories |
-| Customer Management | View, block/unblock, and delete customer accounts |
-| Order Management | Track and update orders (Pending → Shipped → Delivered) |
-| Return Requests | Approve or reject customer return requests with reason review |
-| Refund Tracking | Monitor refund status for returned orders |
-| Analytics Dashboard | View sales reports, revenue stats, and order trends |
+- Product Management
+- Customer Management
+- Order Management
+- Return & Refund Tracking
+- Analytics Dashboard
 
 ### 🛒 Customer Features
-| Feature | Description |
-|---|---|
-| Auth System | Signup/Login with JWT authentication; admin secret code support |
-| Product Browsing | Browse and filter products by category |
-| Product Search | Real-time search across product catalog |
-| Shopping Cart | Add/remove items, update quantities |
-| Checkout | Secure checkout with order placement |
-| Order Tracking | Track order status and delivery progress |
-| Return Requests | Submit return requests with reason and image upload |
-| Refund Status | View refund progress for returned items |
+- Authentication (JWT)
+- Product Browsing & Search
+- Shopping Cart
+- Checkout
+- Order Tracking
+- Return Requests
 
 ---
 
 ## 🧰 Tech Stack
 
-### Frontend
-- **React 19** — UI library
-- **Vite 8** — Fast build tool and dev server
-- **React Router DOM 7** — Client-side routing
-- **Axios** — HTTP client
-- **Material UI (MUI)** — Component library
-- **React Bootstrap** — Additional UI components
-- **Custom CSS** — Modern, responsive UI with animations
-
-### Backend
-- **Node.js** — JavaScript runtime
-- **Express 5** — Web framework
-- **MySQL2** — Database driver
-- **bcryptjs** — Password hashing
-- **JSON Web Tokens (JWT)** — Authentication
-- **dotenv** — Environment variable management
-- **CORS** — Cross-origin resource sharing
-- **Nodemon** — Development hot-reloading
-
-### Database
-- **MySQL** — Relational database
+Frontend: React, Vite, Axios  
+Backend: Node.js, Express  
+Database: MySQL  
 
 ---
 
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- [MySQL](https://www.mysql.com/) (v8 or higher)
-- [Git](https://git-scm.com/)
-
----
-
-## 🚀 Installation & Setup
-
-### 1. Clone the Repository
+## 🚀 Installation
 
 ```bash
 git clone https://github.com/Anjalikhot2000/Order_Management_System.git
 cd Order_Management_System
 ```
 
-### 2. Database Setup
+---
 
-1. Open your MySQL client and create a new database:
-   ```sql
-   CREATE DATABASE shophub;
-   ```
-2. Import the schema:
-   ```bash
-   mysql -u root -p shophub < database.sql
-   ```
-
-### 3. Backend Setup
+## ⚙️ Backend Setup
 
 ```bash
 cd backend
 npm install
-```
-
-Create a `.env` file in the `backend/` directory:
-
-```env
-PORT=5000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=yourpassword
-DB_NAME=shophub
-JWT_SECRET=your_jwt_secret_key
-```
-
-Start the backend server:
-
-```bash
-# Development (with hot-reload)
 npm run dev
-
-# Production
-npm start
 ```
 
-The backend will run on `http://localhost:5000`
+---
 
-### 4. Frontend Setup
+## 🎨 Frontend Setup
 
 ```bash
 cd frontend
@@ -137,264 +70,52 @@ npm install
 npm run dev
 ```
 
-The frontend will run on `http://localhost:5173`
-
 ---
 
-## 🗂️ Project Structure
-
-```
-Order_Management_System/
-│
-├── backend/
-│   ├── config/
-│   │   └── database.js          # MySQL connection config
-│   ├── routes/
-│   │   ├── auth.js              # Authentication routes
-│   │   ├── products.js          # Product CRUD routes
-│   │   ├── orders.js            # Order management routes
-│   │   ├── customers.js         # Customer management routes
-│   │   ├── categories.js        # Category routes
-│   │   ├── dashboard.js         # Analytics & dashboard routes
-│   │   └── users.js             # User management routes
-│   ├── scripts/
-│   │   └── download-product-images.js
-│   ├── uploads/                 # Uploaded product/return images
-│   ├── server.js                # Express server entry point
-│   └── package.json
-│
-├── frontend/
-│   ├── public/
-│   │   └── images/              # Static images
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── AdminLayout.jsx  # Admin dashboard layout
-│   │   │   ├── Layouts.jsx      # Customer layout
-│   │   │   ├── Loader.jsx       # 3-dot animated loader
-│   │   │   ├── GlobalLoader.jsx # Global API loading overlay
-│   │   │   ├── Logo.jsx         # ShopHub logo component
-│   │   │   └── currency.js      # Currency formatter (INR)
-│   │   ├── contexts/
-│   │   │   ├── AuthContext.jsx  # Authentication state
-│   │   │   └── LoadingContext.jsx # Global loading state
-│   │   ├── pages/
-│   │   │   ├── AdminDashboard.jsx
-│   │   │   ├── CustomerDashboard.jsx
-│   │   │   ├── CustomerManagement.jsx
-│   │   │   ├── Products.jsx
-│   │   │   ├── Orders.jsx
-│   │   │   ├── Home.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── Checkout.jsx
-│   │   │   └── OrderConfirmation.jsx
-│   │   ├── utils/
-│   │   │   └── axiosInterceptor.js  # Global API loader interceptor
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   └── package.json
-│
-├── database.sql                 # MySQL schema
-└── README.md
-```
-
----
-
-## 🔑 Default Login Credentials
-
-> ⚠️ Change these immediately in a production environment.
+## 🔑 Default Credentials
 
 | Role | Email | Password |
-|---|---|---|
+|------|------|----------|
 | Admin | admin@shophub.com | admin123 |
-| Customer | Register via `/register` | — |
 
 ---
 
-## 📸 Screenshots
+## 📡 API Endpoints
 
-> _Add screenshots of your UI here._
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/products
+- POST /api/orders
+- GET /api/dashboard/overview
 
-| Admin Dashboard | Customer Portal |
-|---|---|
-| _(screenshot)_ | _(screenshot)_ |
+---
 
-| Product Management | Order Tracking |
-|---|---|
-| _(screenshot)_ | _(screenshot)_ |
+## 💳 Payment
+
+Dummy payment system — any input is accepted.
 
 ---
 
 ## 🔮 Future Enhancements
 
-- [ ] Payment gateway integration (Razorpay / Stripe)
-- [ ] Email notifications for order status updates
-- [ ] Advanced admin analytics with charts
-- [ ] Mobile app (React Native)
-- [ ] Wishlist / product favourites feature
-- [ ] Product reviews and ratings system
-- [ ] Multi-currency support
-- [ ] Progressive Web App (PWA) support
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request
+- Payment Gateway Integration
+- Email Notifications
+- Analytics Dashboard
+- Mobile App
 
 ---
 
 ## 👩‍💻 Author
 
-**Anjali Khot**
-
-- GitHub: [@Anjalikhot2000](https://github.com/Anjalikhot2000)
+Anjali Khot  
+https://github.com/Anjalikhot2000
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+MIT License
 
 ---
 
-<p align="center">Made with ❤️ by Anjali Khot</p> comprehensive order management system built with React, Node.js, Express, and MySQL.
-
-## Features
-
-- User Management (Registration, Login, Role-based Access Control)
-- Product Management
-- Order Processing
-- Shopping Cart
-- Payment Integration (Dummy)
-- Admin Dashboard
-- Customer Dashboard
-
-## Tech Stack
-
-- **Frontend**: React with Vite, React Router, Axios
-- **Backend**: Node.js, Express.js
-- **Database**: MySQL
-- **Authentication**: JWT
-- **Styling**: Tailwind CSS
-
-## Setup Instructions
-
-### Prerequisites
-
-- Node.js (v16 or higher)
-- MySQL Server
-- npm or yarn
-
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Set up MySQL database:
-   - Create a database named `order_management`
-   - Run the database schema:
-     ```bash
-     mysql -u root -p < ../database.sql
-     ```
-   - Insert sample data:
-     ```bash
-     mysql -u root -p order_management < ../sample-data.sql
-     ```
-
-4. Configure environment variables:
-   - Update `.env` file with your MySQL credentials if needed
-
-5. Start the backend server:
-   ```bash
-   npm run dev
-   ```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-## Usage
-
-
-
-### API Endpoints
-
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/products` - Get all products
-- `POST /api/orders` - Create order
-- `GET /api/dashboard/overview` - Dashboard statistics
-
-## Payment
-
-The payment system is implemented as a dummy system. Any card number or UPI ID entered will result in a successful payment.
-
-## Project Structure
-
-```
-order-management-system/
-├── backend/
-│   ├── config/
-│   ├── routes/
-│   ├── server.js
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── contexts/
-│   │   ├── pages/
-│   │   └── App.jsx
-│   └── package.json
-├── database.sql
-└── sample-data.sql
-```
-
-## Features Implemented
-
-- ✅ User Registration and Login
-- ✅ Role-based Access Control (Admin, Manager, Customer)
-- ✅ Product Management
-- ✅ Shopping Cart
-- ✅ Order Processing
-- ✅ Dummy Payment System
-- ✅ Admin Dashboard with Statistics
-- ✅ Responsive UI
-
-## Future Enhancements
-
-- Real payment gateway integration
-- Email notifications
-- Inventory management
-- Order tracking
-- Reports and analytics
-- Multi-warehouse support#   O r d e r _ M a n a g e m e n t _ S y s t e m 
- 
- #   O r d e r _ M a n a g e m e n t _ S y s t e m 
- 
- 
+Made with ❤️ by Anjali Khot
