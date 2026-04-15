@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LoadingProvider, useLoading } from './contexts/LoadingContext';
+import GlobalLoader from './components/GlobalLoader';
+import { setupAxiosInterceptors } from './utils/axiosInterceptor';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -61,13 +64,19 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   return children;
 };
 
-function App() {
+// Inner App component that uses LoadingContext
+const AppContent = () => {
+  const loading = useLoading();
+
+  // Setup axios interceptors on mount
+  useEffect(() => {
+    setupAxiosInterceptors(loading);
+  }, [loading]);
+
   return (
-    <ThemeProvider theme={appTheme}>
-      <CssBaseline />
-      <AuthProvider>
-        <Router>
-          <div className="App">
+    <Router>
+      <GlobalLoader />
+      <div className="App">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -156,7 +165,18 @@ function App() {
             </Routes>
           </div>
         </Router>
-      </AuthProvider>
+      );
+};
+
+function App() {
+  return (
+    <ThemeProvider theme={appTheme}>
+      <CssBaseline />
+      <LoadingProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </LoadingProvider>
     </ThemeProvider>
   );
 }

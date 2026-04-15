@@ -8,13 +8,16 @@ import {
   Chip,
   Container,
   Stack,
-  Typography
+  Typography,
+  AppBar,
+  Toolbar
 } from '@mui/material';
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
 import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded';
 import InsightsRoundedIcon from '@mui/icons-material/InsightsRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useAuth } from '../contexts/AuthContext';
+import Logo from '../components/Logo';
 
 const featureCards = [
   {
@@ -54,7 +57,43 @@ const Home = () => {
   }, [user, navigate]);
 
   return (
-    <Box sx={{ py: { xs: 4, md: 7 } }}>
+    <>
+      <AppBar position="static" sx={{ background: 'linear-gradient(135deg, rgba(15, 76, 129, 0.95), rgba(10, 51, 87, 0.98))', boxShadow: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', py: 1 }}>
+          <Logo variant="default" size="md" showText={true} />
+          <Stack direction="row" spacing={2}>
+            {user ? (
+              <Button
+                component={Link}
+                to="/products"
+                sx={{ color: 'white', textTransform: 'none', fontWeight: 500 }}
+              >
+                Browse Products
+              </Button>
+            ) : (
+              <>
+                <Button
+                  component={Link}
+                  to="/login"
+                  sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'none', fontWeight: 500 }}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  component={Link}
+                  to="/register"
+                  variant="contained"
+                  color="secondary"
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
+                  Create Account
+                </Button>
+              </>
+            )}
+          </Stack>
+        </Toolbar>
+      </AppBar>
+      <Box sx={{ py: { xs: 4, md: 7 } }}>
       <Container maxWidth="xl">
         <Card
           sx={{
@@ -178,7 +217,8 @@ const Home = () => {
           ))}
         </div>
       </Container>
-    </Box>
+      </Box>
+    </>
   );
 };
 

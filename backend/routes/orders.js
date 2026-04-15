@@ -3,6 +3,34 @@ const db = require('../config/database');
 
 const router = express.Router();
 
+const ALLOWED_RETURN_REASONS = [
+    'Damaged product',
+    'Wrong item received',
+    'Not as described',
+    'Quality issue',
+    'Other'
+];
+
+const MAX_RETURN_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
+const RETURN_STATUS = {
+    REQUESTED: 'Requested',
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected'
+};
+
+const REFUND_STATUS = {
+    NOT_INITIATED: 'Not Initiated',
+    PROCESSING: 'Processing',
+    COMPLETED: 'Completed'
+};
+
+const estimateBase64SizeInBytes = (base64Data) => {
+    if (!base64Data) return 0;
+    const sanitized = base64Data.replace(/\s/g, '');
+    const padding = (sanitized.match(/=+$/) || [''])[0].length;
+    return Math.floor((sanitized.length * 3) / 4) - padding;
+};
+
 // Get all orders (admin) or user's orders (customer)
 router.get('/', async (req, res) => {
     try {
@@ -128,6 +156,226 @@ router.put('/:id/status', async (req, res) => {
     try {
         await db.promise().query('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
         res.json({ message: 'Order status updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Submit return request (customer)
+router.post('/return', async (req, res) => {
+    const { order_id, reason, comment, return_image } = req.body;
+
+    if (req.user.role !== 'customer') {
+        return res.status(403).json({ message: 'Only customers can submit return requests' });
+    }
+
+    if (!order_id) {
+        return res.status(400).json({ message: 'Order ID is required' });
+    }
+
+    if (!reason || !ALLOWED_RETURN_REASONS.includes(reason)) {
+        return res.status(400).json({ message: 'Valid return reason is required' });
+    }
+
+    let validatedReturnImage = null;
+    if (return_image) {
+        if (typeof return_image !== 'string') {
+            return res.status(400).json({ message: 'Return image must be a valid image string' });
+        }
+
+        const imageMatch = return_image.match(/^data:(image\/(jpeg|png));base64,(.+)$/i);
+        if (!imageMatch) {
+            return res.status(400).json({ message: 'Only JPG and PNG images are allowed' });
+        }
+
+        const base64Payload = imageMatch[3] || '';
+        const imageSizeInBytes = estimateBase64SizeInBytes(base64Payload);
+        if (imageSizeInBytes > MAX_RETURN_IMAGE_SIZE_BYTES) {
+            return res.status(400).json({ message: 'Image size must be 2MB or less' });
+        }
+
+        validatedReturnImage = return_image;
+    }
+
+    try {
+        const [orders] = await db.promise().query(
+            `
+            SELECT o.id, o.status, c.user_id
+            FROM orders o
+            JOIN customers c ON o.customer_id = c.id
+            WHERE o.id = ?
+            LIMIT 1
+            `,
+            [order_id]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const order = orders[0];
+
+        if (order.user_id !== req.user.id) {
+            return res.status(403).json({ message: 'You can only return your own orders' });
+        }
+
+        if (order.status !== 'delivered') {
+            return res.status(400).json({ message: 'Only delivered orders can be returned' });
+        }
+
+        await db.promise().query(
+            `
+            UPDATE orders
+            SET status = 'returned',
+                return_reason = ?,
+                return_comment = ?,
+                return_image = ?,
+                return_status = ?,
+                refund_status = ?,
+                admin_message = NULL,
+                return_requested_at = NOW()
+            WHERE id = ?
+            `,
+            [
+                reason,
+                comment || null,
+                validatedReturnImage,
+                RETURN_STATUS.REQUESTED,
+                REFUND_STATUS.NOT_INITIATED,
+                order_id
+            ]
+        );
+
+        res.json({ message: 'Return request submitted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Approve return request (admin)
+router.put('/:id/approve', async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admin can approve return requests' });
+    }
+
+    try {
+        const [orders] = await db.promise().query(
+            'SELECT id, status, return_status FROM orders WHERE id = ? LIMIT 1',
+            [req.params.id]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const order = orders[0];
+        if (order.status !== 'returned') {
+            return res.status(400).json({ message: 'Only returned orders can be processed' });
+        }
+
+        if (order.return_status !== RETURN_STATUS.REQUESTED) {
+            return res.status(400).json({ message: 'Only requested returns can be approved' });
+        }
+
+        await db.promise().query(
+            `
+            UPDATE orders
+            SET return_status = ?,
+                refund_status = ?,
+                admin_message = NULL
+            WHERE id = ?
+            `,
+            [RETURN_STATUS.APPROVED, REFUND_STATUS.PROCESSING, req.params.id]
+        );
+
+        res.json({ message: 'Return approved successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Reject return request (admin)
+router.put('/:id/reject', async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admin can reject return requests' });
+    }
+
+    const { admin_message } = req.body;
+    if (!admin_message || !String(admin_message).trim()) {
+        return res.status(400).json({ message: 'Admin rejection message is required' });
+    }
+
+    try {
+        const [orders] = await db.promise().query(
+            'SELECT id, status, return_status FROM orders WHERE id = ? LIMIT 1',
+            [req.params.id]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const order = orders[0];
+        if (order.status !== 'returned') {
+            return res.status(400).json({ message: 'Only returned orders can be processed' });
+        }
+
+        if (order.return_status !== RETURN_STATUS.REQUESTED) {
+            return res.status(400).json({ message: 'Only requested returns can be rejected' });
+        }
+
+        await db.promise().query(
+            `
+            UPDATE orders
+            SET return_status = ?,
+                refund_status = ?,
+                admin_message = ?
+            WHERE id = ?
+            `,
+            [RETURN_STATUS.REJECTED, REFUND_STATUS.NOT_INITIATED, String(admin_message).trim(), req.params.id]
+        );
+
+        res.json({ message: 'Return rejected successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Mark refund as completed (admin)
+router.put('/:id/refund-complete', async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admin can complete refunds' });
+    }
+
+    try {
+        const [orders] = await db.promise().query(
+            'SELECT id, status, return_status, refund_status FROM orders WHERE id = ? LIMIT 1',
+            [req.params.id]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const order = orders[0];
+        if (order.status !== 'returned') {
+            return res.status(400).json({ message: 'Only returned orders can be processed' });
+        }
+
+        if (order.return_status !== RETURN_STATUS.APPROVED) {
+            return res.status(400).json({ message: 'Refund can be completed only for approved returns' });
+        }
+
+        if (order.refund_status !== REFUND_STATUS.PROCESSING) {
+            return res.status(400).json({ message: 'Refund must be in Processing status before completion' });
+        }
+
+        await db.promise().query(
+            'UPDATE orders SET refund_status = ? WHERE id = ?',
+            [REFUND_STATUS.COMPLETED, req.params.id]
+        );
+
+        res.json({ message: 'Refund marked as completed' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

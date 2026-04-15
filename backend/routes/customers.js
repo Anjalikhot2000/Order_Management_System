@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const db = require('../config/database');
 
 const router = express.Router();
@@ -11,6 +12,85 @@ const findCustomerByIdentifier = async (identifier) => {
     return rows[0] || null;
 };
 
+// Create customer account (admin only)
+router.post('/', async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const { name, email, password, phone, address, city, state, zip_code, country } = req.body;
+
+    if (!name || !name.trim()) {
+        return res.status(400).json({ message: 'Name is required' });
+    }
+
+    if (!email || !email.trim()) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedName = name.trim();
+    const normalizedPhone = typeof phone === 'string' && phone.trim() ? phone.trim() : null;
+    const normalizedAddress = typeof address === 'string' && address.trim() ? address.trim() : null;
+    const normalizedCity = typeof city === 'string' && city.trim() ? city.trim() : null;
+    const normalizedState = typeof state === 'string' && state.trim() ? state.trim() : null;
+    const normalizedZipCode = typeof zip_code === 'string' && zip_code.trim() ? zip_code.trim() : null;
+    const normalizedCountry = typeof country === 'string' && country.trim() ? country.trim() : null;
+
+    let transactionStarted = false;
+
+    try {
+        const [existing] = await db.promise().query('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
+        if (existing.length > 0) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await db.promise().beginTransaction();
+        transactionStarted = true;
+
+        const [userResult] = await db.promise().query(
+            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+            [normalizedName, normalizedEmail, hashedPassword, 'customer']
+        );
+
+        const [customerResult] = await db.promise().query(
+            'INSERT INTO customers (user_id, phone, address, city, state, zip_code, country) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [userResult.insertId, normalizedPhone, normalizedAddress, normalizedCity, normalizedState, normalizedZipCode, normalizedCountry]
+        );
+
+        await db.promise().commit();
+
+        res.status(201).json({
+            message: 'Customer added successfully',
+            customer: {
+                id: customerResult.insertId,
+                user_id: userResult.insertId,
+                name: normalizedName,
+                email: normalizedEmail,
+                phone: normalizedPhone,
+                address: normalizedAddress,
+                city: normalizedCity,
+                state: normalizedState,
+                zip_code: normalizedZipCode,
+                country: normalizedCountry,
+                role: 'customer',
+                is_blocked: false,
+                status: 'active',
+            }
+        });
+    } catch (error) {
+        if (transactionStarted) {
+            await db.promise().rollback();
+        }
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 // Get all customers with order count and status (admin only)
 router.get('/', async (req, res) => {
     if (req.user.role !== 'admin') {
@@ -20,13 +100,15 @@ router.get('/', async (req, res) => {
     try {
         const [customers] = await db.promise().query(`
             SELECT c.id, c.user_id, c.phone, c.city, c.state, c.country, c.address, c.zip_code,
-                   u.name, u.email, u.role, u.status, u.created_at,
+                                     u.name, u.email, u.role, u.is_blocked,
+                                     CASE WHEN COALESCE(u.is_blocked, 0) = 1 THEN 'blocked' ELSE 'active' END AS status,
+                                     u.created_at,
                    COUNT(DISTINCT o.id) AS total_orders
             FROM customers c
             JOIN users u ON c.user_id = u.id
             LEFT JOIN orders o ON o.customer_id = c.id
             GROUP BY c.id, c.user_id, c.phone, c.city, c.state, c.country, c.address, c.zip_code,
-                     u.name, u.email, u.role, u.status, u.created_at
+                                         u.name, u.email, u.role, u.is_blocked, u.created_at
             ORDER BY u.created_at DESC
         `);
         res.json(customers);
@@ -44,7 +126,9 @@ router.get('/:id', async (req, res) => {
         }
 
         const [customers] = await db.promise().query(`
-            SELECT c.*, u.name, u.email, u.role, u.status, u.created_at
+            SELECT c.*, u.name, u.email, u.role, u.is_blocked,
+                   CASE WHEN COALESCE(u.is_blocked, 0) = 1 THEN 'blocked' ELSE 'active' END AS status,
+                   u.created_at
             FROM customers c
             JOIN users u ON c.user_id = u.id
             WHERE c.id = ?
@@ -115,9 +199,17 @@ router.put('/:id/block', async (req, res) => {
         return res.status(403).json({ message: 'Admin access required' });
     }
 
-    const { status } = req.body;
-    if (!['active', 'blocked'].includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value' });
+    const { status, is_blocked } = req.body;
+    let blockedValue = null;
+
+    if (typeof is_blocked === 'boolean') {
+        blockedValue = is_blocked;
+    } else if (status === 'active' || status === 'blocked') {
+        blockedValue = status === 'blocked';
+    }
+
+    if (blockedValue === null) {
+        return res.status(400).json({ message: 'Invalid block value' });
     }
 
     try {
@@ -129,9 +221,9 @@ router.put('/:id/block', async (req, res) => {
         const [result] = await db.promise().query(
             `UPDATE users u
              INNER JOIN customers c ON c.user_id = u.id
-             SET u.status = ?
+             SET u.is_blocked = ?
              WHERE c.id = ? OR c.user_id = ?`,
-            [status, identifier, identifier]
+            [blockedValue ? 1 : 0, identifier, identifier]
         );
 
         if ((result.affectedRows || 0) === 0) {
@@ -139,10 +231,10 @@ router.put('/:id/block', async (req, res) => {
             if (!customerRef) {
                 return res.status(404).json({ message: 'Customer not found' });
             }
-            return res.json({ message: `Customer ${status === 'blocked' ? 'blocked' : 'unblocked'} successfully` });
+            return res.json({ message: `Customer ${blockedValue ? 'blocked' : 'unblocked'} successfully` });
         }
 
-        res.json({ message: `Customer ${status === 'blocked' ? 'blocked' : 'unblocked'} successfully` });
+        res.json({ message: `Customer ${blockedValue ? 'blocked' : 'unblocked'} successfully` });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

@@ -10,7 +10,13 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const [users] = await db.promise().query('SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC');
+        const [users] = await db.promise().query(
+            `SELECT id, name, email, role, is_blocked,
+                    CASE WHEN COALESCE(is_blocked, 0) = 1 THEN 'blocked' ELSE 'active' END AS status,
+                    created_at
+             FROM users
+             ORDER BY created_at DESC`
+        );
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -20,7 +26,13 @@ router.get('/', async (req, res) => {
 // Get user profile
 router.get('/profile', async (req, res) => {
     try {
-        const [users] = await db.promise().query('SELECT id, name, email, role FROM users WHERE id = ?', [req.user.id]);
+        const [users] = await db.promise().query(
+            `SELECT id, name, email, role, is_blocked,
+                    CASE WHEN COALESCE(is_blocked, 0) = 1 THEN 'blocked' ELSE 'active' END AS status
+             FROM users
+             WHERE id = ?`,
+            [req.user.id]
+        );
         if (users.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -33,6 +45,33 @@ router.get('/profile', async (req, res) => {
         }
 
         res.json({ ...users[0], customerDetails });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Block / Unblock user (admin only)
+router.put('/:id/block', async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    const { is_blocked } = req.body;
+    if (typeof is_blocked !== 'boolean') {
+        return res.status(400).json({ message: 'is_blocked must be boolean' });
+    }
+
+    try {
+        const [result] = await db.promise().query(
+            'UPDATE users SET is_blocked = ? WHERE id = ?',
+            [is_blocked ? 1 : 0, req.params.id]
+        );
+
+        if ((result.affectedRows || 0) === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: `User ${is_blocked ? 'blocked' : 'unblocked'} successfully` });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

@@ -4,6 +4,15 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency, toNumber } from '../components/currency';
 
+const BACKEND_BASE_URL = 'http://localhost:5000';
+const PLACEHOLDER_IMAGE = `${BACKEND_BASE_URL}/uploads/placeholder.png`;
+
+const resolveImageUrl = (url) => {
+  if (!url) return PLACEHOLDER_IMAGE;
+  if (url.startsWith('/') && !url.startsWith('//')) return `${BACKEND_BASE_URL}${url}`;
+  return url;
+};
+
 const validateShippingAddress = (shippingAddress) => {
   const errors = {};
 
@@ -429,9 +438,10 @@ const Checkout = () => {
                     onChange={() => toggleSelection(item.id)}
                   />
                   <img
-                    src={item.image_url || '/placeholder-product.jpg'}
+                    src={resolveImageUrl(item.image_url)}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PLACEHOLDER_IMAGE; }}
                   />
                   <div className="flex-1">
                     <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>

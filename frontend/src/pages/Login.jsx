@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -41,8 +42,10 @@ const Login = () => {
       <div className="auth-grid">
         <section className="auth-panel">
           <div className="text-panel">
-            <span className="eyebrow">Login Design Examples</span>
-            <h1>Welcome back</h1>
+            <div className="logo-header">
+              <Logo variant="default" size="lg" showText={true} />
+            </div>
+            <h1>Welcome to Order Management System</h1>
             <p className="lead-text">
               We are really happy to see you again! Use your credentials to access your dashboard and continue managing orders.
             </p>
@@ -95,14 +98,6 @@ const Login = () => {
             <div className="auth-footer">
               <span>Don't have an account?</span>{' '}
               <Link to="/register" className="auth-link">Create one</Link>
-            </div>
-
-            <div className="divider-row">or sign in with</div>
-
-            <div className="social-row">
-              <button type="button" className="social-btn">Facebook</button>
-              <button type="button" className="social-btn">Google</button>
-              <button type="button" className="social-btn">Apple</button>
             </div>
           </form>
         </section>

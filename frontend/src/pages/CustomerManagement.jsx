@@ -54,6 +54,11 @@ const CustomerManagement = () => {
   const [editForm,     setEditForm]     = useState({ name:'', email:'', phone:'', city:'', country:'' });
   const [editErrors,   setEditErrors]   = useState({});
 
+  // add modal
+  const [addOpen,      setAddOpen]      = useState(false);
+  const [addForm,      setAddForm]      = useState({ name:'', email:'', password:'', phone:'', role:'customer' });
+  const [addErrors,    setAddErrors]    = useState({});
+
   // delete modal
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -140,6 +145,52 @@ const CustomerManagement = () => {
     setEditCustomer(c);
     setEditForm({ name: c.name || '', email: c.email || '', phone: c.phone || '', city: c.city || '', country: c.country || '' });
     setEditErrors({});
+  };
+
+  const openAdd = () => {
+    setAddOpen(true);
+    setAddForm({ name:'', email:'', password:'', phone:'', role:'customer' });
+    setAddErrors({});
+  };
+
+  const validateAdd = () => {
+    const errs = {};
+    if (!addForm.name.trim()) errs.name = 'Name is required';
+    if (!addForm.email.trim()) errs.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addForm.email)) errs.email = 'Invalid email address';
+    if (!addForm.password) errs.password = 'Password is required';
+    return errs;
+  };
+
+  const saveAdd = async () => {
+    const errs = validateAdd();
+    if (Object.keys(errs).length) {
+      setAddErrors(errs);
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      await axios.post('http://localhost:5000/api/customers', {
+        name: addForm.name.trim(),
+        email: addForm.email.trim(),
+        password: addForm.password,
+        phone: addForm.phone.trim(),
+        role: 'customer',
+      }, getAuthConfig());
+      setAddOpen(false);
+      setCurrentPage(1);
+      await fetchCustomers();
+      showToast('Customer added successfully');
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to add customer';
+      if (/email/i.test(message)) {
+        setAddErrors((prev) => ({ ...prev, email: message }));
+      }
+      showToast(message, 'error');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const validateEdit = () => {
@@ -301,12 +352,20 @@ const CustomerManagement = () => {
             {filtered.length} customer{filtered.length !== 1 ? 's' : ''} found
           </p>
         </div>
-        <button
-          onClick={fetchCustomers}
-          style={{ ...btnBase, background:'#0f4c81', color:'#fff', padding:'0.5rem 1.25rem', fontSize:'0.875rem' }}
-        >
-          ↻ Refresh
-        </button>
+        <div style={{ display:'flex', gap:'0.75rem', flexWrap:'wrap' }}>
+          <button
+            onClick={openAdd}
+            style={{ ...btnBase, background:'#16a34a', color:'#fff', padding:'0.5rem 1.25rem', fontSize:'0.875rem' }}
+          >
+            ➕ Add Customer
+          </button>
+          <button
+            onClick={fetchCustomers}
+            style={{ ...btnBase, background:'#0f4c81', color:'#fff', padding:'0.5rem 1.25rem', fontSize:'0.875rem' }}
+          >
+            ↻ Refresh
+          </button>
+        </div>
       </div>
 
       {/* ── Search & Filter ─────────────────────────────────── */}
@@ -316,12 +375,7 @@ const CustomerManagement = () => {
           placeholder="Search by name or email…"
           value={search}
           onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-          style={{
-            flex:'1 1 240px', padding:'0.65rem 1rem',
-            border:'1.5px solid #e5e7eb', borderRadius:10,
-            fontSize:'0.9rem', outline:'none',
-            boxShadow:'0 1px 4px rgba(15,23,42,0.04)',
-          }}
+          className="customer-management-search"
         />
         <select
           value={filterStatus}
@@ -587,6 +641,61 @@ const CustomerManagement = () => {
             style={{ background:'#7c3aed', textTransform:'none', fontWeight:700, borderRadius:8 }}
           >
             {actionLoading ? <CircularProgress size={18} style={{ color:'#fff' }} /> : 'Save Changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ════════════════════════════════════════════════════
+          ADD CUSTOMER MODAL
+      ════════════════════════════════════════════════════ */}
+      <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth
+        PaperProps={{ style:{ borderRadius:16 } }}>
+        <DialogTitle style={{ fontWeight:800, fontSize:'1.1rem', color:'#0f172a' }}>
+          Add Customer
+        </DialogTitle>
+        <DialogContent dividers style={{ padding:'1.25rem 1.5rem', display:'flex', flexDirection:'column', gap:'1rem' }}>
+          <TextField
+            label="Full Name" fullWidth size="small"
+            value={addForm.name}
+            onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
+            error={!!addErrors.name} helperText={addErrors.name}
+          />
+          <TextField
+            label="Email Address" fullWidth size="small" type="email"
+            value={addForm.email}
+            onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))}
+            error={!!addErrors.email} helperText={addErrors.email}
+          />
+          <TextField
+            label="Password" fullWidth size="small" type="password"
+            value={addForm.password}
+            onChange={e => setAddForm(f => ({ ...f, password: e.target.value }))}
+            error={!!addErrors.password} helperText={addErrors.password}
+          />
+          <TextField
+            label="Phone (Optional)" fullWidth size="small"
+            value={addForm.phone}
+            onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))}
+          />
+          <TextField
+            label="Role" fullWidth size="small"
+            value={addForm.role}
+            slotProps={{ input: { readOnly: true } }}
+            disabled
+            helperText="Customers created here are always assigned the customer role."
+          />
+        </DialogContent>
+        <DialogActions style={{ padding:'1rem 1.5rem', gap:'0.5rem' }}>
+          <Button onClick={() => setAddOpen(false)} style={{ textTransform:'none', fontWeight:700, borderRadius:8 }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={saveAdd}
+            disabled={actionLoading}
+            style={{ background:'#16a34a', textTransform:'none', fontWeight:700, borderRadius:8 }}
+          >
+            {actionLoading ? <CircularProgress size={18} style={{ color:'#fff' }} /> : 'Create Customer'}
           </Button>
         </DialogActions>
       </Dialog>

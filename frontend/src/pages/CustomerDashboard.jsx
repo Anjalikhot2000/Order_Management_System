@@ -3,8 +3,17 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../components/currency';
+import Logo from '../components/Logo';
 
 const ORDER_REVIEWS_STORAGE_KEY = 'orderReviews';
+const RETURN_REASONS = [
+  'Damaged product',
+  'Wrong item received',
+  'Not as described',
+  'Quality issue',
+  'Other'
+];
+const MAX_RETURN_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
 const CustomerDashboard = () => {
   const { user, logout } = useAuth();
@@ -27,6 +36,13 @@ const CustomerDashboard = () => {
   const [selectedRating, setSelectedRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [isReturnOpen, setIsReturnOpen] = useState(false);
+  const [returnOrder, setReturnOrder] = useState(null);
+  const [returnReason, setReturnReason] = useState('');
+  const [returnComment, setReturnComment] = useState('');
+  const [returnImage, setReturnImage] = useState('');
+  const [returnImageName, setReturnImageName] = useState('');
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -61,6 +77,7 @@ const CustomerDashboard = () => {
       packed: '#bfdbfe',
       shipped: '#fbbf24',
       delivered: '#d1fae5',
+      returned: '#ffedd5',
       cancelled: '#fee2e2'
     };
     return statusColors[status] || '#f3f4f6';
@@ -74,6 +91,7 @@ const CustomerDashboard = () => {
       packed: '#1e40af',
       shipped: '#78350f',
       delivered: '#065f46',
+      returned: '#9a3412',
       cancelled: '#7f1d1d'
     };
     return textColors[status] || '#374151';
@@ -94,9 +112,17 @@ const CustomerDashboard = () => {
       processing: orders.filter(o => o.status === 'processing').length,
       shipped: orders.filter(o => o.status === 'shipped').length,
       delivered: orders.filter(o => o.status === 'delivered').length,
+      returned: orders.filter(o => o.status === 'returned').length,
       cancelled: orders.filter(o => o.status === 'cancelled').length
     };
   };
+
+  const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
   const setButtonLoading = (orderId, action, isLoading) => {
     const key = `${orderId}-${action}`;
@@ -111,6 +137,8 @@ const CustomerDashboard = () => {
   const getPaymentStatusLabel = (paymentStatus) => (paymentStatus || 'pending').toUpperCase();
 
   const getPaymentStatusClass = (paymentStatus) => paymentStatus || 'pending';
+
+  const formatTrackingClass = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   const loadOrderDetails = async (orderId) => {
     const response = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
@@ -233,6 +261,116 @@ const CustomerDashboard = () => {
     }
   };
 
+  const closeReturnModal = () => {
+    if (returnSubmitting) return;
+    setIsReturnOpen(false);
+    setReturnOrder(null);
+    setReturnReason('');
+    setReturnComment('');
+    setReturnImage('');
+    setReturnImageName('');
+  };
+
+  const openReturnModal = (order) => {
+    setReturnOrder(order);
+    setReturnReason('');
+    setReturnComment('');
+    setReturnImage('');
+    setReturnImageName('');
+    setIsReturnOpen(true);
+    setActionMessage('');
+  };
+
+  const handleReturnImageChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setReturnImage('');
+      setReturnImageName('');
+      return;
+    }
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      setActionMessage('Only JPG and PNG images are allowed.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_RETURN_IMAGE_SIZE_BYTES) {
+      setActionMessage('Image size must be 2MB or less.');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      const imageAsBase64 = await fileToBase64(file);
+      setReturnImage(imageAsBase64);
+      setReturnImageName(file.name);
+      setActionMessage('');
+    } catch (error) {
+      console.error('Error reading image file:', error);
+      setActionMessage('Unable to process selected image. Please try another file.');
+      event.target.value = '';
+    }
+  };
+
+  const submitReturnRequest = async () => {
+    if (!returnOrder) return;
+
+    if (!returnReason) {
+      setActionMessage('Please select a return reason.');
+      return;
+    }
+
+    setReturnSubmitting(true);
+
+    try {
+      await axios.post('http://localhost:5000/api/orders/return', {
+        order_id: returnOrder.id,
+        reason: returnReason,
+        comment: returnComment.trim(),
+        return_image: returnImage || null
+      });
+
+      setOrders(prev => prev.map((order) => (
+        order.id === returnOrder.id
+          ? {
+              ...order,
+              status: 'returned',
+              return_reason: returnReason,
+              return_comment: returnComment.trim() || null,
+              return_image: returnImage || null,
+              return_status: 'Requested',
+              refund_status: 'Not Initiated',
+              admin_message: null
+            }
+          : order
+      )));
+
+      setSelectedOrder(prev => {
+        if (!prev || prev.id !== returnOrder.id) return prev;
+        return {
+          ...prev,
+          status: 'returned',
+          return_reason: returnReason,
+          return_comment: returnComment.trim() || null,
+          return_image: returnImage || null,
+          return_status: 'Requested',
+          refund_status: 'Not Initiated',
+          admin_message: null
+        };
+      });
+
+      closeReturnModal();
+      setActionMessage('Return request submitted successfully');
+    } catch (error) {
+      console.error('Error submitting return request:', error);
+      setActionMessage(error?.response?.data?.message || 'Unable to submit return request. Please try again.');
+    } finally {
+      setReturnSubmitting(false);
+    }
+  };
+
   const openReviewModal = (order) => {
     const existingReview = reviewsByOrder[order.id];
     if (existingReview) {
@@ -307,11 +445,8 @@ const CustomerDashboard = () => {
       <aside className={`customer-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="logo-icon">🛍️</div>
-            <div>
-              <h2>ShopHub</h2>
-              <p>Your Orders</p>
-            </div>
+            <Logo variant="sidebar" size="md" showText={true} />
+            <p className="sidebar-logo-subtitle">Your Orders</p>
           </div>
           <button 
             className="sidebar-toggle"
@@ -619,6 +754,12 @@ const CustomerDashboard = () => {
             >
               Delivered <span className="count">({counts.delivered})</span>
             </button>
+            <button
+              className={`filter-pill ${filterStatus === 'returned' ? 'active' : ''}`}
+              onClick={() => setFilterStatus('returned')}
+            >
+              Returned <span className="count">({counts.returned})</span>
+            </button>
           </div>
 
           {/* Orders List */}
@@ -660,7 +801,33 @@ const CustomerDashboard = () => {
                         <label>Shipping</label>
                         <p>{order.shipping_address || '—'}</p>
                       </div>
+                      {order.status === 'returned' && (
+                        <>
+                          <div className="detail-item">
+                            <label>Return Status</label>
+                            <p>
+                              <span className={`tracking-badge ${formatTrackingClass(order.return_status || 'Requested')}`}>
+                                {order.return_status || 'Requested'}
+                              </span>
+                            </p>
+                          </div>
+                          <div className="detail-item">
+                            <label>Refund Status</label>
+                            <p>
+                              <span className={`tracking-badge ${formatTrackingClass(order.refund_status || 'Not Initiated')}`}>
+                                {order.refund_status || 'Not Initiated'}
+                              </span>
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
+                    {order.status === 'returned' && order.return_status === 'Rejected' && order.admin_message && (
+                      <div className="rejection-message-box" style={{ marginTop: '0.85rem' }}>
+                        <strong>Admin Message</strong>
+                        <p>{order.admin_message}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="order-actions">
@@ -681,6 +848,15 @@ const CustomerDashboard = () => {
                     {order.status === 'shipped' && (
                       <button className="action-btn secondary-btn">
                         📍 Track Order
+                      </button>
+                    )}
+                    {order.status === 'delivered' && (
+                      <button
+                        className="action-btn secondary-btn"
+                        onClick={() => openReturnModal(order)}
+                        disabled={isButtonLoading(order.id, 'return')}
+                      >
+                        ↩ Return Order
                       </button>
                     )}
                     {order.status === 'delivered' && (
@@ -797,6 +973,36 @@ const CustomerDashboard = () => {
                     </table>
                   )}
                 </section>
+
+                {selectedOrder.status === 'returned' && (
+                  <section className="modal-section">
+                    <h3>Return & Refund Tracking</h3>
+                    <div className="info-grid">
+                      <div className="info-item">
+                        <label>Return Status</label>
+                        <p>
+                          <span className={`tracking-badge ${formatTrackingClass(selectedOrder.return_status || 'Requested')}`}>
+                            {selectedOrder.return_status || 'Requested'}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="info-item">
+                        <label>Refund Status</label>
+                        <p>
+                          <span className={`tracking-badge ${formatTrackingClass(selectedOrder.refund_status || 'Not Initiated')}`}>
+                            {selectedOrder.refund_status || 'Not Initiated'}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    {selectedOrder.return_status === 'Rejected' && selectedOrder.admin_message && (
+                      <div className="rejection-message-box" style={{ marginTop: '0.85rem' }}>
+                        <strong>Admin Message</strong>
+                        <p>{selectedOrder.admin_message}</p>
+                      </div>
+                    )}
+                  </section>
+                )}
               </div>
 
               <div className="modal-footer-pro">
@@ -896,6 +1102,97 @@ const CustomerDashboard = () => {
                   disabled={reviewSubmitting || selectedRating < 1}
                 >
                   {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isReturnOpen && returnOrder && (
+          <div className="modal-overlay-pro" onClick={closeReturnModal}>
+            <div className="modal-content-pro" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header-pro">
+                <div>
+                  <span className="modal-label">Return Request</span>
+                  <h2>Return Order #{returnOrder.id}</h2>
+                </div>
+                <button
+                  className="modal-close-pro"
+                  onClick={closeReturnModal}
+                  disabled={returnSubmitting}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="modal-body-pro">
+                <section className="modal-section">
+                  <h3>Return Reason</h3>
+                  <div className="form-group-pro">
+                    <label>Reason *</label>
+                    <select
+                      className="form-input-pro"
+                      value={returnReason}
+                      onChange={(e) => setReturnReason(e.target.value)}
+                      disabled={returnSubmitting}
+                    >
+                      <option value="">Select a reason</option>
+                      {RETURN_REASONS.map((reason) => (
+                        <option key={reason} value={reason}>{reason}</option>
+                      ))}
+                    </select>
+                  </div>
+                </section>
+
+                <section className="modal-section">
+                  <h3>Additional Comments (Optional)</h3>
+                  <textarea
+                    className="review-textarea"
+                    placeholder="Add more details about the return request..."
+                    value={returnComment}
+                    onChange={(e) => setReturnComment(e.target.value)}
+                    rows={4}
+                    maxLength={500}
+                    disabled={returnSubmitting}
+                  />
+                </section>
+
+                <section className="modal-section">
+                  <h3>Upload Image (Optional but recommended)</h3>
+                  <div className="form-group-pro">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                      onChange={handleReturnImageChange}
+                      disabled={returnSubmitting}
+                    />
+                    <p className="review-hint">Accepted formats: JPG, PNG. Max size: 2MB.</p>
+                    {returnImageName && <p className="review-hint">Selected: {returnImageName}</p>}
+                    {returnImage && (
+                      <img
+                        src={returnImage}
+                        alt="Return proof preview"
+                        className="return-preview-image"
+                      />
+                    )}
+                  </div>
+                </section>
+              </div>
+
+              <div className="modal-footer-pro">
+                <button
+                  className="btn-outline"
+                  onClick={closeReturnModal}
+                  disabled={returnSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={submitReturnRequest}
+                  disabled={returnSubmitting || !returnReason}
+                >
+                  {returnSubmitting ? 'Submitting...' : 'Submit Return'}
                 </button>
               </div>
             </div>

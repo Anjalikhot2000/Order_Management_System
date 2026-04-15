@@ -37,25 +37,6 @@ const initDatabase = async () => {
                 }
             }
             console.log('Database schema initialized or already exists');
-
-            // Insert sample data
-            const sampleDataPath = path.join(__dirname, '..', 'sample-data.sql');
-            if (fs.existsSync(sampleDataPath)) {
-                const sampleData = fs.readFileSync(sampleDataPath, 'utf8');
-                const sampleStatements = sampleData.split(';').filter(stmt => stmt.trim().length > 0);
-
-                for (const statement of sampleStatements) {
-                    if (statement.trim()) {
-                        try {
-                            await db.promise().query(statement);
-                        } catch (error) {
-                            // Ignore errors for sample data (might already exist)
-                            console.log('Sample data statement skipped');
-                        }
-                    }
-                }
-                console.log('Sample data inserted');
-            }
         }
     } catch (error) {
         console.error('Error initializing database:', error);
@@ -71,7 +52,7 @@ db.connect(async (err) => {
     console.log('Connected to MySQL database');
     await initDatabase();
 
-    // Ensure status column exists on users table (idempotent migration)
+    // Ensure status column exists on users table (legacy compatibility)
     try {
         await db.promise().query(
             "ALTER TABLE users ADD COLUMN status ENUM('active','blocked') NOT NULL DEFAULT 'active'"
@@ -79,6 +60,25 @@ db.connect(async (err) => {
         console.log('Added status column to users table');
     } catch (e) {
         // Column already exists — safe to ignore
+    }
+
+    // Ensure is_blocked exists as source-of-truth for account blocking
+    try {
+        await db.promise().query(
+            "ALTER TABLE users ADD COLUMN is_blocked BOOLEAN NOT NULL DEFAULT FALSE"
+        );
+        console.log('Added is_blocked column to users table');
+    } catch (e) {
+        // Column already exists — safe to ignore
+    }
+
+    // Backfill is_blocked from legacy status values
+    try {
+        await db.promise().query(
+            "UPDATE users SET is_blocked = 1 WHERE status = 'blocked'"
+        );
+    } catch (e) {
+        // Safe to ignore if status column does not exist
     }
 
     // Ensure image_url column is LONGTEXT for large Base64 images (idempotent migration)
@@ -100,6 +100,84 @@ db.connect(async (err) => {
     } catch (e) {
         console.log('users.role enum migration skipped:', e.message.substring(0, 80));
     }
+
+    // Ensure orders.status supports returned lifecycle state
+    try {
+        await db.promise().query(
+            "ALTER TABLE orders MODIFY COLUMN status ENUM('pending','confirmed','processing','packed','shipped','delivered','returned','cancelled') DEFAULT 'pending'"
+        );
+        console.log('Updated orders.status enum with returned state');
+    } catch (e) {
+        console.log('orders.status migration skipped:', e.message.substring(0, 80));
+    }
+
+    // Ensure return metadata fields exist on orders table
+    try {
+        await db.promise().query('ALTER TABLE orders ADD COLUMN return_reason VARCHAR(255) NULL');
+        console.log('Added orders.return_reason column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE orders ADD COLUMN return_comment TEXT NULL');
+        console.log('Added orders.return_comment column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE orders ADD COLUMN return_image LONGTEXT NULL');
+        console.log('Added orders.return_image column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE orders ADD COLUMN return_requested_at TIMESTAMP NULL');
+        console.log('Added orders.return_requested_at column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query("ALTER TABLE orders ADD COLUMN return_status VARCHAR(50) NULL");
+        console.log('Added orders.return_status column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE orders MODIFY COLUMN return_status VARCHAR(50) NULL');
+    } catch (e) {
+        // Safe to ignore if alter is not required
+    }
+
+    try {
+        await db.promise().query("ALTER TABLE orders ADD COLUMN refund_status VARCHAR(50) NOT NULL DEFAULT 'Not Initiated'");
+        console.log('Added orders.refund_status column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE orders ADD COLUMN admin_message TEXT NULL');
+        console.log('Added orders.admin_message column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    // Backfill tracking statuses for existing returned orders
+    try {
+        await db.promise().query(
+            "UPDATE orders SET return_status = 'Requested' WHERE status = 'returned' AND (return_status IS NULL OR return_status = '')"
+        );
+        await db.promise().query(
+            "UPDATE orders SET refund_status = 'Not Initiated' WHERE (refund_status IS NULL OR refund_status = '')"
+        );
+    } catch (e) {
+        // Safe to ignore if tables are not initialized yet
+    }
 });
 
 // JWT middleware
@@ -107,10 +185,29 @@ const authenticateToken = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Access denied' });
 
-    jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret', (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret', async (err, user) => {
         if (err) return res.status(403).json({ message: 'Invalid token' });
-        req.user = user;
-        next();
+
+        try {
+            const [rows] = await db.promise().query(
+                'SELECT id, email, role, is_blocked FROM users WHERE id = ? LIMIT 1',
+                [user.id]
+            );
+
+            if (rows.length === 0) {
+                return res.status(401).json({ message: 'User not found' });
+            }
+
+            const dbUser = rows[0];
+            if (Boolean(dbUser.is_blocked)) {
+                return res.status(403).json({ message: 'You are blocked due to suspicious activities' });
+            }
+
+            req.user = { id: dbUser.id, email: dbUser.email, role: dbUser.role };
+            next();
+        } catch (authError) {
+            res.status(500).json({ message: 'Server error during authentication' });
+        }
     });
 };
 
@@ -123,6 +220,13 @@ const authorizeRoles = (...roles) => {
         next();
     };
 };
+
+// Static file serving for uploaded product images
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

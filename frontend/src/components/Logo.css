@@ -1,0 +1,168 @@
+/* Logo Styles */
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logo-link:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+/* Logo Image Variants */
+.logo-image {
+  object-fit: contain;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Logo Sizes */
+.logo-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.logo-md {
+  width: 48px;
+  height: 48px;
+}
+
+.logo-lg {
+  width: 64px;
+  height: 64px;
+}
+
+/* Logo Text */
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  transition: all 0.3s ease;
+}
+
+.logo-text-sm {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.logo-text-md {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.logo-text-lg {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* Variant Styles */
+.logo-default {
+  color: #0f4c81;
+}
+
+.logo-default .logo-text {
+  color: #0f4c81;
+}
+
+.logo-sidebar {
+  width: 48px;
+  height: 48px;
+}
+
+.logo-sidebar .logo-text {
+  color: #0f4c81;
+}
+
+.logo-inline {
+  width: 40px;
+  height: 40px;
+}
+
+.logo-inline .logo-text {
+  color: #0f4c81;
+}
+
+/* Text-Only Logo */
+.logo-text-only {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .logo-image {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+  }
+
+  .logo-text-md {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-image {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .logo-text {
+    font-size: 0.875rem;
+  }
+
+  .logo-text-md {
+    font-size: 0.875rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hover Effect with Subtle Scale */
+.logo-link:hover .logo-image {
+  transform: scale(1.05);
+}
+
+/* Dark theme support (for sidebar) */
+.dark .logo-link {
+  color: white;
+}
+
+.dark .logo-text {
+  color: white;
+}
+
+/* AppBar/Header support - white text */
+header .logo-link {
+  color: white;
+}
+
+header .logo-text {
+  color: white;
+}
+
+/* Ensure white text in AppBar */
+[class*="MuiAppBar"] .logo-text {
+  color: white !important;
+}
+
+[class*="MuiToolbar"] .logo-text {
+  color: white !important;
+}

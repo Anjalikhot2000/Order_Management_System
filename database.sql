@@ -10,6 +10,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin', 'customer') DEFAULT 'customer',
+    is_blocked BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -54,9 +55,16 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT,
     total_amount DECIMAL(10,2) NOT NULL,
-    status ENUM('pending', 'confirmed', 'processing', 'packed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    status ENUM('pending', 'confirmed', 'processing', 'packed', 'shipped', 'delivered', 'returned', 'cancelled') DEFAULT 'pending',
     shipping_address TEXT,
     payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending',
+    return_reason VARCHAR(255),
+    return_comment TEXT,
+    return_image LONGTEXT,
+    return_status VARCHAR(50) NULL,
+    refund_status VARCHAR(50) DEFAULT 'Not Initiated',
+    admin_message TEXT,
+    return_requested_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL

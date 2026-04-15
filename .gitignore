@@ -1,0 +1,28 @@
+# Logs
+*.log
+*.err.log
+logs/
+
+# Node dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dev placeholders
+placeholder.png
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/

@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '../components/Logo';
+
+const ADMIN_CODE = 'ADMIN';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: 'customer'
+    confirmPassword: ''
   });
+  const [role, setRole] = useState('customer');
+  const [adminCode, setAdminCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,7 +39,13 @@ const Register = () => {
       return;
     }
 
-    const result = await register(formData.name, formData.email, formData.password, formData.role);
+    if (role === 'admin' && adminCode.trim() !== ADMIN_CODE) {
+      setError('Invalid admin code');
+      setLoading(false);
+      return;
+    }
+
+    const result = await register(formData.name, formData.email, formData.password, role, adminCode.trim());
 
     if (result.success) {
       setSuccess(result.message);
@@ -53,6 +63,9 @@ const Register = () => {
       <div className="auth-grid">
         <section className="auth-panel">
           <div className="text-panel">
+            <div className="logo-header">
+              <Logo variant="default" size="lg" showText={true} />
+            </div>
             <span className="eyebrow">Create Account</span>
             <h1>Stay connected</h1>
             <p className="lead-text">
@@ -127,18 +140,42 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="role">Register as</label>
+              <label htmlFor="role">Role</label>
               <select
                 id="role"
                 name="role"
                 className="auth-input"
-                value={formData.role}
-                onChange={handleChange}
+                value={role}
+                onChange={(e) => {
+                  const selectedRole = e.target.value;
+                  setRole(selectedRole);
+                  if (selectedRole !== 'admin') {
+                    setAdminCode('');
+                  }
+                }}
               >
                 <option value="customer">Customer</option>
                 <option value="admin">Admin</option>
               </select>
+              <small className="auth-input-hint">Enter admin code only if authorized.</small>
             </div>
+
+            {role === 'admin' && (
+              <div className="form-group">
+                <label htmlFor="adminCode">Admin Secret Code</label>
+                <input
+                  id="adminCode"
+                  name="adminCode"
+                  type="text"
+                  className="auth-input"
+                  placeholder="Enter Admin Secret Code"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                  autoComplete="off"
+                />
+                <small className="auth-input-hint">Enter admin code only if authorized.</small>
+              </div>
+            )}
 
             {error && <div className="auth-error">{error}</div>}
             {success && <div className="auth-success">{success}</div>}
