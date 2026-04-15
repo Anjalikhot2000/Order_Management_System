@@ -132,10 +132,6 @@ https://github.com/Anjalikhot2000
 
 ---
 
-## 📄 License
-
-MIT License
-
 ---
 
 Made with ❤️ by Anjali Khot
