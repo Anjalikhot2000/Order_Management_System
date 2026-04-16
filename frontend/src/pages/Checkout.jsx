@@ -3,8 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency, toNumber } from '../components/currency';
+import { API_BASE_URL } from '../config/api';
 
-const BACKEND_BASE_URL = 'http://localhost:5000';
+const BACKEND_BASE_URL = API_BASE_URL || '';
 const PLACEHOLDER_IMAGE = `${BACKEND_BASE_URL}/uploads/placeholder.png`;
 
 const resolveImageUrl = (url) => {
