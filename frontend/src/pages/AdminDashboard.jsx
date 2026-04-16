@@ -15,6 +15,11 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState(initialSection);
 
+  const getAuthConfig = () => {
+    const token = localStorage.getItem('token');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -45,7 +50,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get('/api/dashboard/overview');
+      const response = await axios.get('/api/dashboard/overview', getAuthConfig());
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -56,7 +61,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 
   const fetchSalesReport = async () => {
     try {
-      const response = await axios.get('/api/dashboard/sales-report?period=month');
+      const response = await axios.get('/api/dashboard/sales-report?period=month', getAuthConfig());
       setSalesReport(response.data);
     } catch (error) {
       console.error('Error fetching sales report:', error);

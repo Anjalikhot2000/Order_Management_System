@@ -62,6 +62,11 @@ const Products = () => {
   const isAdmin = user?.role === 'admin';
   const isCustomer = user?.role === 'customer';
 
+  const getAuthConfig = () => {
+    const token = localStorage.getItem('token');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(searchInput.trim().toLowerCase());
@@ -366,7 +371,7 @@ const Products = () => {
       const response = await axios.post('/api/categories', {
         name: trimmedName,
         description: trimmedDescription,
-      });
+      }, getAuthConfig());
 
       const createdCategory = {
         id: response?.data?.id,
@@ -399,7 +404,7 @@ const Products = () => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`/api/categories/${category.id}`);
+      await axios.delete(`/api/categories/${category.id}`, getAuthConfig());
       const normalizedName = normalizeCategoryName(category.name);
 
       setCategories((prevCategories) => {
@@ -546,7 +551,7 @@ const Products = () => {
   };
 
   const addProduct = async (payload) => {
-    return axios.post('/api/products', payload);
+    return axios.post('/api/products', payload, getAuthConfig());
   };
 
   const guardAdminAccess = () => {
@@ -749,7 +754,7 @@ const Products = () => {
       const categoryName = selectedCategoryDetails?.name || '';
 
       if (editProductId) {
-        const response = await axios.put(`/api/products/${editProductId}`, payload);
+        const response = await axios.put(`/api/products/${editProductId}`, payload, getAuthConfig());
         const savedProduct = response?.data?.product || {};
         setBaseStockById((prev) => ({
           ...prev,
@@ -836,7 +841,7 @@ const Products = () => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`/api/products/${productId}`);
+      await axios.delete(`/api/products/${productId}`, getAuthConfig());
       alert('Product deleted successfully');
       fetchProducts();
     } catch (error) {
