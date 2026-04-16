@@ -1,16 +1,39 @@
-# React + Vite
+# Frontend Deployment (Vercel)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This frontend is configured for Vercel deployment.
 
-Currently, two official plugins are available:
+## Required Environment Variable
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Set this in Vercel Project Settings -> Environment Variables:
 
-## React Compiler
+- `VITE_API_BASE_URL`: Your deployed backend base URL (example: `https://your-backend-domain.com`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Notes:
 
-## Expanding the ESLint configuration
+- API calls are made to relative paths like `/api/...` and use `VITE_API_BASE_URL` as axios `baseURL`.
+- If `VITE_API_BASE_URL` is not set in production, API calls will go to the Vercel frontend domain and fail.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Deploy Steps
+
+1. Push this repository to GitHub.
+2. In Vercel, click **Add New Project** and import this repository.
+3. Set the project root directory to `frontend`.
+4. Build command: `npm run build`.
+5. Output directory: `dist`.
+6. Add `VITE_API_BASE_URL` in environment variables.
+7. Deploy.
+
+## Local Development
+
+Create `frontend/.env` with:
+
+`VITE_API_BASE_URL=http://localhost:5000`
+
+Then run:
+
+- `npm install`
+- `npm run dev`
+
+## SPA Routing
+
+`vercel.json` includes a rewrite to `index.html` so direct navigation and browser refresh work on nested routes.
