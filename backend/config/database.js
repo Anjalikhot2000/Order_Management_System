@@ -1,6 +1,10 @@
 const mysql = require('mysql2');
 
 const isTruthy = (value) => ['1', 'true', 'yes', 'on', 'required'].includes(String(value || '').toLowerCase());
+const parsePositiveNumber = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+};
 
 const getUrlSslEnabled = (parsedUrl) => {
     const sslMode = parsedUrl.searchParams.get('ssl-mode') || '';
@@ -28,6 +32,7 @@ const buildSslOptions = () => {
 
     return {
         rejectUnauthorized,
+        ...(process.env.DB_SSL_MIN_VERSION ? { minVersion: process.env.DB_SSL_MIN_VERSION } : {}),
         ...(ca ? { ca } : {}),
     };
 };
@@ -48,6 +53,7 @@ const getConnectionConfig = () => {
             password: decodeURIComponent(parsed.password || process.env.DB_PASSWORD || ''),
             database: (parsed.pathname || '').replace(/^\//, '') || process.env.DB_NAME || 'order_management',
             connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
+            ...(parsePositiveNumber(process.env.DB_IP_FAMILY) ? { family: parsePositiveNumber(process.env.DB_IP_FAMILY) } : {}),
             ...(ssl ? { ssl } : {}),
         };
     }
@@ -61,6 +67,7 @@ const getConnectionConfig = () => {
         password: process.env.DB_PASSWORD || '',
         database: process.env.DB_NAME || 'order_management',
         connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
+        ...(parsePositiveNumber(process.env.DB_IP_FAMILY) ? { family: parsePositiveNumber(process.env.DB_IP_FAMILY) } : {}),
         ...(ssl ? { ssl } : {}),
     };
 };
