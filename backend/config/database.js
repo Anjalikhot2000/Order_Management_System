@@ -2,6 +2,12 @@ const mysql = require('mysql2');
 
 const isTruthy = (value) => ['1', 'true', 'yes', 'on', 'required'].includes(String(value || '').toLowerCase());
 
+const getUrlSslEnabled = (parsedUrl) => {
+    const sslMode = parsedUrl.searchParams.get('ssl-mode') || '';
+    const ssl = parsedUrl.searchParams.get('ssl') || '';
+    return isTruthy(sslMode) || isTruthy(ssl);
+};
+
 const normalizeMultiline = (value) => (value ? String(value).replace(/\\n/g, '\n') : '');
 
 const buildSslOptions = () => {
@@ -26,8 +32,9 @@ const getConnectionConfig = () => {
     const databaseUrl = process.env.DATABASE_URL || process.env.MYSQL_URL || '';
     if (databaseUrl) {
         const parsed = new URL(databaseUrl);
-        const sslMode = parsed.searchParams.get('ssl-mode') || '';
-        const sslEnabled = isTruthy(process.env.DB_SSL) || isTruthy(sslMode) || isTruthy(process.env.DB_SSL_MODE);
+        const sslEnabled = isTruthy(process.env.DB_SSL)
+            || getUrlSslEnabled(parsed)
+            || isTruthy(process.env.DB_SSL_MODE);
         const ssl = sslEnabled ? (buildSslOptions() || { rejectUnauthorized: true }) : undefined;
 
         return {
@@ -36,6 +43,7 @@ const getConnectionConfig = () => {
             user: decodeURIComponent(parsed.username || process.env.DB_USER || 'root'),
             password: decodeURIComponent(parsed.password || process.env.DB_PASSWORD || ''),
             database: (parsed.pathname || '').replace(/^\//, '') || process.env.DB_NAME || 'order_management',
+            connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
             ...(ssl ? { ssl } : {}),
         };
     }
@@ -48,6 +56,7 @@ const getConnectionConfig = () => {
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || '',
         database: process.env.DB_NAME || 'order_management',
+        connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
         ...(ssl ? { ssl } : {}),
     };
 };
