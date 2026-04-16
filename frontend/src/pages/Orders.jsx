@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -220,36 +220,36 @@ const Orders = () => {
             className={`sidebar-item ${activeMenu === 'Dashboard' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Dashboard')}
           >
-            ðŸ“Š Dashboard
+            📊 Dashboard
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Orders' ? 'active' : ''}`}
           >
-            ðŸ“¦ Orders
+            📦 Orders
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Products' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Products')}
           >
-            ðŸ›ï¸ Products
+            🛍️ Products
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Customers' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Customers')}
           >
-            ðŸ‘¥ Customers
+            👥 Customers
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Reports' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Reports')}
           >
-            ðŸ“ˆ Reports
+            📈 Reports
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Settings' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Settings')}
           >
-            âš™ï¸ Settings
+            ⚙️ Settings
           </button>
         </nav>
       </aside>
@@ -272,7 +272,7 @@ const Orders = () => {
         <section className="orders-section-pro">
           <div className="filters-card">
             <div className="search-box">
-              <span className="search-icon">ðŸ”</span>
+              <span className="search-icon">🔍</span>
               <input 
                 type="text"
                 placeholder="Search by Order ID or Customer name..."
@@ -351,14 +351,14 @@ const Orders = () => {
                           disabled={editLoading}
                           title="Edit Order"
                         >
-                          {editLoading ? 'â³' : 'âœŽ'}
+                          {editLoading ? '⏳' : '✎'}
                         </button>
                         <button 
                           className="action-btn delete-btn-pro"
                           onClick={() => handleDelete(order.id)}
                           title="Delete Order"
                         >
-                          ðŸ—‘
+                          🗑
                         </button>
                       </td>
                     </tr>
@@ -386,7 +386,7 @@ const Orders = () => {
                 className="modal-close-pro"
                 onClick={() => setShowEditModal(false)}
               >
-                âœ•
+                ✕
               </button>
             </div>
             

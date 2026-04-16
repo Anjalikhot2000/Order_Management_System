@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -770,7 +770,7 @@ const Products = () => {
           return nextProducts;
         });
         
-        setFormSuccess('âœ“ Product updated successfully');
+        setFormSuccess('✓ Product updated successfully');
         closeProductModal();
       } else {
         const response = await addProduct(payload);
@@ -793,7 +793,7 @@ const Products = () => {
           [newId]: stock_quantity
         }));
 
-        setFormSuccess('âœ“ Product added successfully');
+        setFormSuccess('✓ Product added successfully');
         closeProductModal();
         setCartToastMessage('Product added successfully');
         setShowCartToast(true);
@@ -1018,7 +1018,7 @@ const Products = () => {
                         onClick={() => deleteCategory(category)}
                         aria-label={`Delete ${category.name}`}
                       >
-                        Ã—
+                        ×
                       </button>
                     )}
                   </div>
@@ -1029,7 +1029,7 @@ const Products = () => {
 
           <section className="products-content-panel">
             <div className="products-search-wrap">
-            <span className="products-search-icon">ðŸ”</span>
+            <span className="products-search-icon">🔍</span>
             <input
               type="text"
               value={searchInput}
@@ -1044,7 +1044,7 @@ const Products = () => {
                 className="products-search-clear"
                 aria-label="Clear search"
               >
-                Ã—
+                ×
               </button>
             )}
           </div>
@@ -1159,7 +1159,7 @@ const Products = () => {
                     className="product-modal-close"
                     onClick={closeProductModal}
                   >
-                    Ã—
+                    ×
                   </button>
                 </div>
 
@@ -1258,7 +1258,7 @@ const Products = () => {
                       onDrop={handleImageDrop}
                     >
                       <div className="product-upload-dropzone-content">
-                        <p className="product-upload-dropzone-icon">ðŸ“</p>
+                        <p className="product-upload-dropzone-icon">📁</p>
                         <p className="product-upload-dropzone-text">
                           Drag and drop your image here
                         </p>
@@ -1324,7 +1324,7 @@ const Products = () => {
                             onClick={toggleImageObjectFit}
                             title={imageObjectFit === 'cover' ? 'Switch to Fit' : 'Switch to Fill'}
                           >
-                            {imageObjectFit === 'cover' ? 'ðŸ”² Fill' : 'ðŸ“ Fit'}
+                            {imageObjectFit === 'cover' ? '🔲 Fill' : '📐 Fit'}
                           </button>
                           <button
                             type="button"
@@ -1332,7 +1332,7 @@ const Products = () => {
                             onClick={removeImage}
                             title="Remove image"
                           >
-                            ðŸ—‘ï¸ Remove
+                            🗑️ Remove
                           </button>
                         </div>
                       </div>
@@ -1346,8 +1346,8 @@ const Products = () => {
                       </div>
                       <p className="product-image-preview-tip">
                         {imageObjectFit === 'cover' 
-                          ? 'ðŸ”² Fill mode: Image covers the entire preview area' 
-                          : 'ðŸ“ Fit mode: Image fits entirely within preview area'}
+                          ? '🔲 Fill mode: Image covers the entire preview area' 
+                          : '📐 Fit mode: Image fits entirely within preview area'}
                       </p>
                     </div>
                   )}
@@ -1402,7 +1402,7 @@ const Products = () => {
                     className="product-modal-close"
                     onClick={closeCategoryModal}
                   >
-                    Ã—
+                    ×
                   </button>
                 </div>
 

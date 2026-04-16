@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -143,22 +143,22 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
           <section className="dashboard-grid">
             <div className="metrics-grid">
               <div className="metric-card blue-card">
-                <div className="metric-title">💰 Total Sales</div>
+                <div className="metric-title">?? Total Sales</div>
                 <div className="metric-value">{formatCurrency(stats.totalRevenue)}</div>
                 <div className="metric-note">Paid orders only</div>
               </div>
               <div className="metric-card purple-card">
-                <div className="metric-title">📦 Total Orders</div>
+                <div className="metric-title">?? Total Orders</div>
                 <div className="metric-value">{stats.totalOrders || 0}</div>
                 <div className="metric-note">All time</div>
               </div>
               <div className="metric-card green-card">
-                <div className="metric-title">🛍️ Products</div>
+                <div className="metric-title">??? Products</div>
                 <div className="metric-value">{stats.totalProducts || 0}</div>
                 <div className="metric-note">In catalog</div>
               </div>
               <div className="metric-card yellow-card">
-                <div className="metric-title">⚠️ Low Stock</div>
+                <div className="metric-title">?? Low Stock</div>
                 <div className="metric-value">{stats.lowStockProducts || 0}</div>
                 <div className="metric-note">Below 10 units</div>
               </div>
@@ -166,7 +166,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 
             <div className="overview-card">
               <div className="overview-header">
-                <h2>🔥 Top Selling Products</h2>
+                <h2>?? Top Selling Products</h2>
                 <span>By quantity sold</span>
               </div>
               <div style={{ padding: '1rem 0' }}>
@@ -195,7 +195,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
           <section className="dashboard-bottom">
             <div className="recent-table-card">
               <div className="section-heading">
-                <h3>📋 Recent Orders</h3>
+                <h3>?? Recent Orders</h3>
                 <span>{stats.recentOrders?.length || 0} latest</span>
               </div>
               {stats.recentOrders && stats.recentOrders.length > 0 ? (
@@ -228,7 +228,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 
             <div className="side-summary-card">
               <div className="section-heading">
-                <h3>📊 Performance</h3>
+                <h3>?? Performance</h3>
                 <span>Key metrics</span>
               </div>
               <div className="summary-list">
@@ -262,7 +262,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <div className="recent-table-card">
             <div className="section-heading">
-              <h3>📈 Monthly Sales Report</h3>
+              <h3>?? Monthly Sales Report</h3>
               <span>Revenue by month</span>
             </div>
             {salesReport.length > 0 ? (
@@ -303,7 +303,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
       {/* Settings Section */}
       {activeSection === 'settings' && (
         <div className="recent-table-card">
-          <div className="section-heading"><h3>⚙️ Settings</h3><span>System configuration</span></div>
+          <div className="section-heading"><h3>?? Settings</h3><span>System configuration</span></div>
           <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label style={{ fontWeight: 700, color: '#334155', fontSize: '0.9rem' }}>Admin Name</label>
@@ -360,7 +360,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
               fontWeight: 600,
               border: '1px solid #fcd34d'
             }}>
-              ⚙️ Advanced settings such as database management and user role configuration are available via the API.
+              ?? Advanced settings such as database management and user role configuration are available via the API.
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../components/currency';
@@ -7,7 +7,7 @@ import {
   Button, TextField, CircularProgress,
 } from '@mui/material';
 
-/* â”€â”€ inline style tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── inline style tokens ───────────────────────────────────── */
 const card = {
   background: '#fff',
   borderRadius: 16,
@@ -33,11 +33,11 @@ const STATUS_COLORS = {
 
 const ITEMS_PER_PAGE = 10;
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════════════════════════════════════════════════════ */
 const CustomerManagement = () => {
   const { user } = useAuth();
 
-  /* â”€â”€ state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── state ─────────────────────────────────────────────── */
   const [customers,   setCustomers]   = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [search,      setSearch]      = useState('');
@@ -84,23 +84,23 @@ const CustomerManagement = () => {
     }
   }, []);
 
-  /* â”€â”€ fetch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── fetch ─────────────────────────────────────────────── */
   useEffect(() => {
     if (user?.role === 'admin') fetchCustomers();
   }, [user, fetchCustomers]);
 
-  /* â”€â”€ toast helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── toast helper ───────────────────────────────────────── */
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  /* â”€â”€ access guard (after all hooks) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── access guard (after all hooks) ────────────────────── */
   if (user?.role !== 'admin') {
     return (
       <div style={{ display:'flex', justifyContent:'center', padding:'4rem' }}>
         <div style={{ ...card, padding:'2.5rem 3rem', textAlign:'center' }}>
-          <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>ðŸš«</div>
+          <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🚫</div>
           <p style={{ color:'#dc2626', fontWeight:700, fontSize:'1.1rem', margin:0 }}>
             Access Denied: Admins only
           </p>
@@ -109,7 +109,7 @@ const CustomerManagement = () => {
     );
   }
 
-  /* â”€â”€ filtering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── filtering ─────────────────────────────────────────── */
   const filtered = customers.filter(c => {
     const q = search.toLowerCase();
     const matchSearch = !q ||
@@ -125,7 +125,7 @@ const CustomerManagement = () => {
 
   const goPage = (p) => setCurrentPage(Math.max(1, Math.min(p, totalPages)));
 
-  /* â”€â”€ view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── view ───────────────────────────────────────────────── */
   const handleView = async (customer) => {
     setViewCustomer(customer);
     setViewOrders([]);
@@ -140,7 +140,7 @@ const CustomerManagement = () => {
     }
   };
 
-  /* â”€â”€ edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── edit ───────────────────────────────────────────────── */
   const openEdit = (c) => {
     setEditCustomer(c);
     setEditForm({ name: c.name || '', email: c.email || '', phone: c.phone || '', city: c.city || '', country: c.country || '' });
@@ -217,7 +217,7 @@ const CustomerManagement = () => {
     }
   };
 
-  /* â”€â”€ block / unblock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── block / unblock ────────────────────────────────────── */
   const handleBlock = async (customerId) => {
     const normalizedId = Number.parseInt(customerId, 10);
     console.log('[CustomerManagement] handleBlock triggered for customer:', customerId, 'normalized:', normalizedId);
@@ -275,7 +275,7 @@ const CustomerManagement = () => {
     }
   };
 
-  /* â”€â”€ delete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── delete ─────────────────────────────────────────────── */
   const handleDelete = (customerId) => {
     const normalizedId = Number.parseInt(customerId, 10);
     console.log('[CustomerManagement] handleDelete triggered for customer:', customerId, 'normalized:', normalizedId);
@@ -326,7 +326,7 @@ const CustomerManagement = () => {
     }
   };
 
-  /* â”€â”€ render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── render ─────────────────────────────────────────────── */
   return (
     <section style={{ padding:'2rem', display:'flex', flexDirection:'column', gap:'1.5rem' }}>
 
@@ -344,7 +344,7 @@ const CustomerManagement = () => {
         </div>
       )}
 
-      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Header ─────────────────────────────────────────── */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem' }}>
         <div>
           <h2 style={{ margin:0, fontWeight:800, fontSize:'1.5rem', color:'#0f172a' }}>Customer Management</h2>
@@ -357,22 +357,22 @@ const CustomerManagement = () => {
             onClick={openAdd}
             style={{ ...btnBase, background:'#16a34a', color:'#fff', padding:'0.5rem 1.25rem', fontSize:'0.875rem' }}
           >
-            âž• Add Customer
+            ➕ Add Customer
           </button>
           <button
             onClick={fetchCustomers}
             style={{ ...btnBase, background:'#0f4c81', color:'#fff', padding:'0.5rem 1.25rem', fontSize:'0.875rem' }}
           >
-            â†» Refresh
+            ↻ Refresh
           </button>
         </div>
       </div>
 
-      {/* â”€â”€ Search & Filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Search & Filter ─────────────────────────────────── */}
       <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap', alignItems:'center' }}>
         <input
           type="text"
-          placeholder="Search by name or emailâ€¦"
+          placeholder="Search by name or email…"
           value={search}
           onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
           className="customer-management-search"
@@ -392,7 +392,7 @@ const CustomerManagement = () => {
         </select>
       </div>
 
-      {/* â”€â”€ Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Table ───────────────────────────────────────────── */}
       <div style={{ ...card, overflowX:'auto' }}>
         {loading ? (
           <div style={{ padding:'3rem', textAlign:'center' }}>
@@ -436,23 +436,23 @@ const CustomerManagement = () => {
                       </span>
                     </td>
                     <td style={{ padding:'0.85rem 1rem', color:'#64748b', whiteSpace:'nowrap' }}>
-                      {c.created_at ? new Date(c.created_at).toLocaleDateString() : 'â€”'}
+                      {c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}
                     </td>
                     <td style={{ padding:'0.85rem 1rem' }}>
                       <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap' }}>
-                        {/* View â€” Blue */}
+                        {/* View — Blue */}
                         <button
                           onClick={() => handleView(c)}
                           style={{ ...btnBase, background:'#3b82f6', color:'#fff' }}
                           title="View Details"
                         >View</button>
-                        {/* Edit â€” Purple */}
+                        {/* Edit — Purple */}
                         <button
                           onClick={() => openEdit(c)}
                           style={{ ...btnBase, background:'#7c3aed', color:'#fff' }}
                           title="Edit Customer"
                         >Edit</button>
-                        {/* Block/Unblock â€” Orange / Green */}
+                        {/* Block/Unblock — Orange / Green */}
                         <button
                           onClick={() => handleBlock(c.id)}
                           disabled={actionLoading}
@@ -461,7 +461,7 @@ const CustomerManagement = () => {
                         >
                           {c.status === 'blocked' ? 'Unblock' : 'Block'}
                         </button>
-                        {/* Delete â€” Red */}
+                        {/* Delete — Red */}
                         <button
                           onClick={() => handleDelete(c.id)}
                           style={{ ...btnBase, background:'#dc2626', color:'#fff' }}
@@ -477,11 +477,11 @@ const CustomerManagement = () => {
         )}
       </div>
 
-      {/* â”€â”€ Pagination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Pagination ──────────────────────────────────────── */}
       {totalPages > 1 && (
         <div style={{ display:'flex', gap:'0.4rem', justifyContent:'center', alignItems:'center', flexWrap:'wrap' }}>
           <button onClick={() => goPage(currentPage - 1)} disabled={currentPage === 1}
-            style={{ ...btnBase, background:'#e5e7eb', color:'#374151', padding:'0.4rem 0.8rem' }}>â€¹</button>
+            style={{ ...btnBase, background:'#e5e7eb', color:'#374151', padding:'0.4rem 0.8rem' }}>‹</button>
           {Array.from({ length: totalPages }, (_, i) => (
             <button key={i} onClick={() => goPage(i + 1)}
               style={{
@@ -493,17 +493,17 @@ const CustomerManagement = () => {
             >{i + 1}</button>
           ))}
           <button onClick={() => goPage(currentPage + 1)} disabled={currentPage === totalPages}
-            style={{ ...btnBase, background:'#e5e7eb', color:'#374151', padding:'0.4rem 0.8rem' }}>â€º</button>
+            style={{ ...btnBase, background:'#e5e7eb', color:'#374151', padding:'0.4rem 0.8rem' }}>›</button>
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ════════════════════════════════════════════════════
           VIEW DETAILS MODAL
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ════════════════════════════════════════════════════ */}
       <Dialog open={!!viewCustomer} onClose={() => setViewCustomer(null)} maxWidth="md" fullWidth
         PaperProps={{ style:{ borderRadius:16, overflow:'hidden' } }}>
         <DialogTitle style={{ background:'#0f4c81', color:'#fff', fontWeight:800, fontSize:'1.15rem' }}>
-          Customer Details â€” {viewCustomer?.name}
+          Customer Details — {viewCustomer?.name}
         </DialogTitle>
         <DialogContent dividers style={{ padding:'1.5rem' }}>
           {viewCustomer && (
@@ -514,12 +514,12 @@ const CustomerManagement = () => {
                   ['Customer ID', `#${viewCustomer.id}`],
                   ['Name',        viewCustomer.name],
                   ['Email',       viewCustomer.email],
-                  ['Phone',       viewCustomer.phone || 'â€”'],
-                  ['City',        viewCustomer.city || 'â€”'],
-                  ['Country',     viewCustomer.country || 'â€”'],
+                  ['Phone',       viewCustomer.phone || '—'],
+                  ['City',        viewCustomer.city || '—'],
+                  ['Country',     viewCustomer.country || '—'],
                   ['Total Orders',viewCustomer.total_orders ?? 0],
-                  ['Status',      viewCustomer.status === 'blocked' ? 'ðŸ”´ Blocked' : 'ðŸŸ¢ Active'],
-                  ['Joined',      viewCustomer.created_at ? new Date(viewCustomer.created_at).toLocaleDateString() : 'â€”'],
+                  ['Status',      viewCustomer.status === 'blocked' ? '🔴 Blocked' : '🟢 Active'],
+                  ['Joined',      viewCustomer.created_at ? new Date(viewCustomer.created_at).toLocaleDateString() : '—'],
                 ].map(([label, value]) => (
                   <div key={label} style={{ background:'#f8fafc', borderRadius:10, padding:'0.85rem 1rem' }}>
                     <p style={{ margin:0, fontSize:'0.75rem', color:'#64748b', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}>{label}</p>
@@ -593,13 +593,13 @@ const CustomerManagement = () => {
         </DialogActions>
       </Dialog>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ════════════════════════════════════════════════════
           EDIT MODAL
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ════════════════════════════════════════════════════ */}
       <Dialog open={!!editCustomer} onClose={() => setEditCustomer(null)} maxWidth="sm" fullWidth
         PaperProps={{ style:{ borderRadius:16 } }}>
         <DialogTitle style={{ fontWeight:800, fontSize:'1.1rem', color:'#0f172a' }}>
-          Edit Customer â€” {editCustomer?.name}
+          Edit Customer — {editCustomer?.name}
         </DialogTitle>
         <DialogContent dividers style={{ padding:'1.25rem 1.5rem', display:'flex', flexDirection:'column', gap:'1rem' }}>
           <TextField
@@ -645,9 +645,9 @@ const CustomerManagement = () => {
         </DialogActions>
       </Dialog>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ════════════════════════════════════════════════════
           ADD CUSTOMER MODAL
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ════════════════════════════════════════════════════ */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth
         PaperProps={{ style:{ borderRadius:16 } }}>
         <DialogTitle style={{ fontWeight:800, fontSize:'1.1rem', color:'#0f172a' }}>
@@ -700,9 +700,9 @@ const CustomerManagement = () => {
         </DialogActions>
       </Dialog>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ════════════════════════════════════════════════════
           DELETE CONFIRMATION MODAL
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ════════════════════════════════════════════════════ */}
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs"
         PaperProps={{ style:{ borderRadius:16 } }}>
         <DialogTitle style={{ fontWeight:800, color:'#dc2626' }}>Delete Customer</DialogTitle>
