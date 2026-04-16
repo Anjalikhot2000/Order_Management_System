@@ -65,6 +65,12 @@ const initDatabase = async () => {
 
             for (const statement of statements) {
                 if (statement.trim()) {
+                    // Skip CREATE DATABASE and USE statements — managed databases
+                    // (Aiven, PlanetScale, Railway, etc.) don't support them.
+                    const normalized = statement.trim().toUpperCase();
+                    if (normalized.startsWith('CREATE DATABASE') || normalized.startsWith('USE ')) {
+                        continue;
+                    }
                     try {
                         await db.promise().query(statement);
                     } catch (error) {
