@@ -41,7 +41,7 @@ router.post('/', async (req, res) => {
     const normalizedZipCode = typeof zip_code === 'string' && zip_code.trim() ? zip_code.trim() : null;
     const normalizedCountry = typeof country === 'string' && country.trim() ? country.trim() : null;
 
-    let transactionStarted = false;
+    let conn;
 
     try {
         const [existing] = await db.promise().query('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
@@ -50,20 +50,20 @@ router.post('/', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await db.promise().beginTransaction();
-        transactionStarted = true;
+        conn = await db.promise().getConnection();
+        await conn.beginTransaction();
 
-        const [userResult] = await db.promise().query(
+        const [userResult] = await conn.query(
             'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
             [normalizedName, normalizedEmail, hashedPassword, 'customer']
         );
 
-        const [customerResult] = await db.promise().query(
+        const [customerResult] = await conn.query(
             'INSERT INTO customers (user_id, phone, address, city, state, zip_code, country) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [userResult.insertId, normalizedPhone, normalizedAddress, normalizedCity, normalizedState, normalizedZipCode, normalizedCountry]
         );
 
-        await db.promise().commit();
+        await conn.commit();
 
         res.status(201).json({
             message: 'Customer added successfully',
@@ -84,10 +84,12 @@ router.post('/', async (req, res) => {
             }
         });
     } catch (error) {
-        if (transactionStarted) {
-            await db.promise().rollback();
+        if (conn) {
+            await conn.rollback();
         }
         res.status(500).json({ message: 'Server error', error: error.message });
+    } finally {
+        if (conn) conn.release();
     }
 });
 
