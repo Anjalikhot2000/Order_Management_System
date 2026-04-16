@@ -3,10 +3,11 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../components/currency';
+import { API_BASE_URL } from '../config/api';
 
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
-const BACKEND_BASE_URL = 'http://localhost:5000';
+const BACKEND_BASE_URL = API_BASE_URL || '';
 const DEFAULT_PRODUCT_PLACEHOLDER = `${BACKEND_BASE_URL}/uploads/placeholder.png`;
 const PRODUCT_IMAGE_CACHE_KEY = 'productImageCache:v1';
 const LOCAL_CATEGORIES_KEY = 'localCategories:v1';
