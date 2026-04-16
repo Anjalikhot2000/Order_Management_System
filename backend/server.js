@@ -81,6 +81,49 @@ db.connect(async (err) => {
         // Safe to ignore if status column does not exist
     }
 
+    // Ensure customer profile columns exist for admin create/update flows
+    try {
+        await db.promise().query('ALTER TABLE customers ADD COLUMN phone VARCHAR(20) NULL');
+        console.log('Added customers.phone column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE customers ADD COLUMN address TEXT NULL');
+        console.log('Added customers.address column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE customers ADD COLUMN city VARCHAR(100) NULL');
+        console.log('Added customers.city column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE customers ADD COLUMN state VARCHAR(100) NULL');
+        console.log('Added customers.state column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE customers ADD COLUMN zip_code VARCHAR(20) NULL');
+        console.log('Added customers.zip_code column');
+    } catch (e) {
+        // Column already exists
+    }
+
+    try {
+        await db.promise().query('ALTER TABLE customers ADD COLUMN country VARCHAR(100) NULL');
+        console.log('Added customers.country column');
+    } catch (e) {
+        // Column already exists
+    }
+
     // Ensure image_url column is LONGTEXT for large Base64 images (idempotent migration)
     try {
         await db.promise().query(
