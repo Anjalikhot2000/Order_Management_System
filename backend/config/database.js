@@ -22,8 +22,12 @@ const buildSslOptions = () => {
         : '';
     const ca = certFromText || certFromBase64;
 
+    const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED == null
+        ? Boolean(ca)
+        : isTruthy(process.env.DB_SSL_REJECT_UNAUTHORIZED);
+
     return {
-        rejectUnauthorized: isTruthy(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true'),
+        rejectUnauthorized,
         ...(ca ? { ca } : {}),
     };
 };

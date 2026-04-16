@@ -41,12 +41,18 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', service: 'backend' });
-});
-
 // Database connection
 const db = require('./config/database');
+
+app.get('/api/health', async (req, res) => {
+    try {
+        await db.promise().query('SELECT 1');
+        res.json({ status: 'ok', service: 'backend', database: 'connected' });
+    } catch (error) {
+        console.error('Health check database failure:', error.message);
+        res.status(500).json({ status: 'error', service: 'backend', database: 'disconnected' });
+    }
+});
 
 // Initialize database schema
 const initDatabase = async () => {
@@ -282,6 +288,7 @@ const authenticateToken = (req, res, next) => {
             req.user = { id: dbUser.id, email: dbUser.email, role: dbUser.role };
             next();
         } catch (authError) {
+            console.error('Authentication database error:', authError.message);
             res.status(500).json({ message: 'Server error during authentication' });
         }
     });
