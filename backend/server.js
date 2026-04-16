@@ -74,13 +74,11 @@ const initDatabase = async () => {
 };
 
 // Initialize database on startup
-db.connect(async (err) => {
-    if (err) {
-        console.error('Database connection failed:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
-    await initDatabase();
+const initializeDatabase = async () => {
+    try {
+        await db.promise().query('SELECT 1');
+        console.log('Connected to MySQL database');
+        await initDatabase();
 
     // Ensure status column exists on users table (legacy compatibility)
     try {
@@ -240,18 +238,23 @@ db.connect(async (err) => {
         // Column already exists
     }
 
-    // Backfill tracking statuses for existing returned orders
-    try {
-        await db.promise().query(
-            "UPDATE orders SET return_status = 'Requested' WHERE status = 'returned' AND (return_status IS NULL OR return_status = '')"
-        );
-        await db.promise().query(
-            "UPDATE orders SET refund_status = 'Not Initiated' WHERE (refund_status IS NULL OR refund_status = '')"
-        );
-    } catch (e) {
-        // Safe to ignore if tables are not initialized yet
+        // Backfill tracking statuses for existing returned orders
+        try {
+            await db.promise().query(
+                "UPDATE orders SET return_status = 'Requested' WHERE status = 'returned' AND (return_status IS NULL OR return_status = '')"
+            );
+            await db.promise().query(
+                "UPDATE orders SET refund_status = 'Not Initiated' WHERE (refund_status IS NULL OR refund_status = '')"
+            );
+        } catch (e) {
+            // Safe to ignore if tables are not initialized yet
+        }
+    } catch (err) {
+        console.error('Database connection failed:', err);
     }
-});
+};
+
+initializeDatabase();
 
 // JWT middleware
 const authenticateToken = (req, res, next) => {

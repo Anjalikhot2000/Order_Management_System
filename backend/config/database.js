@@ -77,6 +77,13 @@ if (shouldAutoCreateDb) {
     });
 }
 
-const db = mysql.createConnection(baseConfig);
+const db = mysql.createPool({
+    ...baseConfig,
+    waitForConnections: true,
+    connectionLimit: Number(process.env.DB_POOL_SIZE || 10),
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
+});
 
 module.exports = db;
