@@ -45,6 +45,7 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({ message, role: assignedRole });
     } catch (error) {
+        console.error('Register route failed:', error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
@@ -80,6 +81,7 @@ router.post('/login', async (req, res) => {
 
         res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     } catch (error) {
+        console.error('Login route failed:', error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
