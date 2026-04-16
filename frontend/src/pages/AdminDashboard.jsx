@@ -45,7 +45,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/dashboard/overview');
+      const response = await axios.get('/api/dashboard/overview');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -56,7 +56,7 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 
   const fetchSalesReport = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/dashboard/sales-report?period=month');
+      const response = await axios.get('/api/dashboard/sales-report?period=month');
       setSalesReport(response.data);
     } catch (error) {
       console.error('Error fetching sales report:', error);
@@ -370,3 +370,4 @@ const AdminDashboard = ({ initialSection = 'dashboard' }) => {
 };
 
 export default AdminDashboard;
+

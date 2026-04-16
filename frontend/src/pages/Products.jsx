@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -271,7 +271,7 @@ const Products = () => {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get('/api/products');
       const productsWithImages = await attachMissingProductImages(response.data);
       const stockMap = response.data.reduce((acc, product) => {
         acc[product.id] = Number.parseInt(product.stock_quantity || 0, 10) || 0;
@@ -295,7 +295,7 @@ const Products = () => {
     const storedCategories = loadLocalCategories();
 
     try {
-      const response = await axios.get('http://localhost:5000/api/categories');
+      const response = await axios.get('/api/categories');
       const mergedCategories = mergeUniqueCategories(response.data || [], storedCategories);
       setCategories(mergedCategories);
       saveLocalCategories(mergedCategories);
@@ -362,7 +362,7 @@ const Products = () => {
     setCategoryFormError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/categories', {
+      const response = await axios.post('/api/categories', {
         name: trimmedName,
         description: trimmedDescription,
       });
@@ -398,7 +398,7 @@ const Products = () => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/categories/${category.id}`);
+      await axios.delete(`/api/categories/${category.id}`);
       const normalizedName = normalizeCategoryName(category.name);
 
       setCategories((prevCategories) => {
@@ -545,7 +545,7 @@ const Products = () => {
   };
 
   const addProduct = async (payload) => {
-    return axios.post('http://localhost:5000/api/products', payload);
+    return axios.post('/api/products', payload);
   };
 
   const guardAdminAccess = () => {
@@ -748,7 +748,7 @@ const Products = () => {
       const categoryName = selectedCategoryDetails?.name || '';
 
       if (editProductId) {
-        const response = await axios.put(`http://localhost:5000/api/products/${editProductId}`, payload);
+        const response = await axios.put(`/api/products/${editProductId}`, payload);
         const savedProduct = response?.data?.product || {};
         setBaseStockById((prev) => ({
           ...prev,
@@ -770,7 +770,7 @@ const Products = () => {
           return nextProducts;
         });
         
-        setFormSuccess('✓ Product updated successfully');
+        setFormSuccess('âœ“ Product updated successfully');
         closeProductModal();
       } else {
         const response = await addProduct(payload);
@@ -793,7 +793,7 @@ const Products = () => {
           [newId]: stock_quantity
         }));
 
-        setFormSuccess('✓ Product added successfully');
+        setFormSuccess('âœ“ Product added successfully');
         closeProductModal();
         setCartToastMessage('Product added successfully');
         setShowCartToast(true);
@@ -835,7 +835,7 @@ const Products = () => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`);
+      await axios.delete(`/api/products/${productId}`);
       alert('Product deleted successfully');
       fetchProducts();
     } catch (error) {
@@ -1018,7 +1018,7 @@ const Products = () => {
                         onClick={() => deleteCategory(category)}
                         aria-label={`Delete ${category.name}`}
                       >
-                        ×
+                        Ã—
                       </button>
                     )}
                   </div>
@@ -1029,7 +1029,7 @@ const Products = () => {
 
           <section className="products-content-panel">
             <div className="products-search-wrap">
-            <span className="products-search-icon">🔍</span>
+            <span className="products-search-icon">ðŸ”</span>
             <input
               type="text"
               value={searchInput}
@@ -1044,7 +1044,7 @@ const Products = () => {
                 className="products-search-clear"
                 aria-label="Clear search"
               >
-                ×
+                Ã—
               </button>
             )}
           </div>
@@ -1159,7 +1159,7 @@ const Products = () => {
                     className="product-modal-close"
                     onClick={closeProductModal}
                   >
-                    ×
+                    Ã—
                   </button>
                 </div>
 
@@ -1258,7 +1258,7 @@ const Products = () => {
                       onDrop={handleImageDrop}
                     >
                       <div className="product-upload-dropzone-content">
-                        <p className="product-upload-dropzone-icon">📁</p>
+                        <p className="product-upload-dropzone-icon">ðŸ“</p>
                         <p className="product-upload-dropzone-text">
                           Drag and drop your image here
                         </p>
@@ -1324,7 +1324,7 @@ const Products = () => {
                             onClick={toggleImageObjectFit}
                             title={imageObjectFit === 'cover' ? 'Switch to Fit' : 'Switch to Fill'}
                           >
-                            {imageObjectFit === 'cover' ? '🔲 Fill' : '📐 Fit'}
+                            {imageObjectFit === 'cover' ? 'ðŸ”² Fill' : 'ðŸ“ Fit'}
                           </button>
                           <button
                             type="button"
@@ -1332,7 +1332,7 @@ const Products = () => {
                             onClick={removeImage}
                             title="Remove image"
                           >
-                            🗑️ Remove
+                            ðŸ—‘ï¸ Remove
                           </button>
                         </div>
                       </div>
@@ -1346,8 +1346,8 @@ const Products = () => {
                       </div>
                       <p className="product-image-preview-tip">
                         {imageObjectFit === 'cover' 
-                          ? '🔲 Fill mode: Image covers the entire preview area' 
-                          : '📐 Fit mode: Image fits entirely within preview area'}
+                          ? 'ðŸ”² Fill mode: Image covers the entire preview area' 
+                          : 'ðŸ“ Fit mode: Image fits entirely within preview area'}
                       </p>
                     </div>
                   )}
@@ -1402,7 +1402,7 @@ const Products = () => {
                     className="product-modal-close"
                     onClick={closeCategoryModal}
                   >
-                    ×
+                    Ã—
                   </button>
                 </div>
 

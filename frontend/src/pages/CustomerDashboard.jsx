@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -60,7 +60,7 @@ const CustomerDashboard = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/orders');
+      const response = await axios.get('/api/orders');
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -141,7 +141,7 @@ const CustomerDashboard = () => {
   const formatTrackingClass = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   const loadOrderDetails = async (orderId) => {
-    const response = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
+    const response = await axios.get(`/api/orders/${orderId}`);
     return response.data;
   };
 
@@ -241,7 +241,7 @@ const CustomerDashboard = () => {
     setActionMessage('');
 
     try {
-      await axios.put(`http://localhost:5000/api/orders/${order.id}/cancel`);
+      await axios.put(`/api/orders/${order.id}/cancel`);
 
       setOrders(prev => prev.map(o => (
         o.id === order.id ? { ...o, status: 'cancelled' } : o
@@ -325,7 +325,7 @@ const CustomerDashboard = () => {
     setReturnSubmitting(true);
 
     try {
-      await axios.post('http://localhost:5000/api/orders/return', {
+      await axios.post('/api/orders/return', {
         order_id: returnOrder.id,
         reason: returnReason,
         comment: returnComment.trim(),
@@ -452,7 +452,7 @@ const CustomerDashboard = () => {
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            ☰
+            â˜°
           </button>
         </div>
 
@@ -463,14 +463,14 @@ const CustomerDashboard = () => {
               className={`menu-item ${activeSection === 'orders' ? 'active' : ''}`}
               onClick={() => { setActiveSection('orders'); setFilterStatus('all'); }}
             >
-              <span className="menu-icon">📊</span>
+              <span className="menu-icon">ðŸ“Š</span>
               <span>Dashboard</span>
             </button>
             <button
               className="menu-item"
               onClick={() => navigate('/products')}
             >
-              <span className="menu-icon">🛒</span>
+              <span className="menu-icon">ðŸ›’</span>
               <span>Shop</span>
             </button>
           </div>
@@ -481,28 +481,28 @@ const CustomerDashboard = () => {
               className={`menu-item ${activeSection === 'orders' && filterStatus === 'all' ? 'active' : ''}`}
               onClick={() => { setActiveSection('orders'); setFilterStatus('all'); }}
             >
-              <span className="menu-icon">📦</span>
+              <span className="menu-icon">ðŸ“¦</span>
               <span>All Orders</span>
             </button>
             <button
               className={`menu-item ${activeSection === 'orders' && filterStatus === 'pending' ? 'active' : ''}`}
               onClick={() => { setActiveSection('orders'); setFilterStatus('pending'); }}
             >
-              <span className="menu-icon">⏳</span>
+              <span className="menu-icon">â³</span>
               <span>Pending</span>
             </button>
             <button
               className={`menu-item ${activeSection === 'orders' && filterStatus === 'shipped' ? 'active' : ''}`}
               onClick={() => { setActiveSection('orders'); setFilterStatus('shipped'); }}
             >
-              <span className="menu-icon">✈️</span>
+              <span className="menu-icon">âœˆï¸</span>
               <span>Shipped</span>
             </button>
             <button
               className={`menu-item ${activeSection === 'orders' && filterStatus === 'delivered' ? 'active' : ''}`}
               onClick={() => { setActiveSection('orders'); setFilterStatus('delivered'); }}
             >
-              <span className="menu-icon">✓</span>
+              <span className="menu-icon">âœ“</span>
               <span>Delivered</span>
             </button>
           </div>
@@ -513,21 +513,21 @@ const CustomerDashboard = () => {
               className={`menu-item ${activeSection === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveSection('profile')}
             >
-              <span className="menu-icon">👤</span>
+              <span className="menu-icon">ðŸ‘¤</span>
               <span>Profile</span>
             </button>
             <button
               className={`menu-item ${activeSection === 'payments' ? 'active' : ''}`}
               onClick={() => setActiveSection('payments')}
             >
-              <span className="menu-icon">💳</span>
+              <span className="menu-icon">ðŸ’³</span>
               <span>Payments</span>
             </button>
             <button
               className={`menu-item ${activeSection === 'help' ? 'active' : ''}`}
               onClick={() => setActiveSection('help')}
             >
-              <span className="menu-icon">❓</span>
+              <span className="menu-icon">â“</span>
               <span>Help &amp; Support</span>
             </button>
           </div>
@@ -537,7 +537,7 @@ const CustomerDashboard = () => {
               className="menu-item logout"
               onClick={() => { logout(); navigate('/login'); }}
             >
-              <span className="menu-icon">🚪</span>
+              <span className="menu-icon">ðŸšª</span>
               <span>Logout</span>
             </button>
           </div>
@@ -553,10 +553,10 @@ const CustomerDashboard = () => {
               className="mobile-menu-toggle"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
-              ☰
+              â˜°
             </button>
             <div className="search-container">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon">ðŸ”</span>
               <input 
                 type="text"
                 placeholder="Search by order ID, name, or status..."
@@ -568,7 +568,7 @@ const CustomerDashboard = () => {
           </div>
           <div className="header-right">
             <div className="header-info">
-              <p className="date-time">📅 {new Date().toLocaleDateString()}</p>
+              <p className="date-time">ðŸ“… {new Date().toLocaleDateString()}</p>
               <div className="user-profile">
                 <div className="avatar" style={{display:'flex',alignItems:'center',justifyContent:'center',width:40,height:40,borderRadius:'50%',background:'#0f4c81',color:'white',fontWeight:700,fontSize:16}}>{(user?.name || 'U')[0].toUpperCase()}</div>
                 <div className="user-info">
@@ -669,32 +669,32 @@ const CustomerDashboard = () => {
             </div>
             <div className="help-grid">
               <div className="faq-card">
-                <div className="faq-icon">📦</div>
+                <div className="faq-icon">ðŸ“¦</div>
                 <h3>How do I track my order?</h3>
                 <p>Once your order is shipped, check the <strong>Shipped</strong> filter in your orders list to view the latest status.</p>
               </div>
               <div className="faq-card">
-                <div className="faq-icon">✕</div>
+                <div className="faq-icon">âœ•</div>
                 <h3>How do I cancel an order?</h3>
                 <p>Orders with <strong>Pending</strong> or <strong>Confirmed</strong> status can be cancelled using the Cancel button on the order card.</p>
               </div>
               <div className="faq-card">
-                <div className="faq-icon">💳</div>
+                <div className="faq-icon">ðŸ’³</div>
                 <h3>What payment methods are accepted?</h3>
                 <p>We accept Credit/Debit Cards and UPI payments at checkout.</p>
               </div>
               <div className="faq-card">
-                <div className="faq-icon">🔄</div>
+                <div className="faq-icon">ðŸ”„</div>
                 <h3>How do I request a refund?</h3>
                 <p>Contact our support team with your order ID. Refunds are processed within 5-7 business days.</p>
               </div>
               <div className="faq-card">
-                <div className="faq-icon">📧</div>
+                <div className="faq-icon">ðŸ“§</div>
                 <h3>Contact Support</h3>
-                <p>Email: <strong>support@shophub.com</strong><br/>Phone: <strong>1-800-SHOPHUB</strong><br/>Mon–Fri, 9am–6pm</p>
+                <p>Email: <strong>support@shophub.com</strong><br/>Phone: <strong>1-800-SHOPHUB</strong><br/>Monâ€“Fri, 9amâ€“6pm</p>
               </div>
               <div className="faq-card">
-                <div className="faq-icon">🛒</div>
+                <div className="faq-icon">ðŸ›’</div>
                 <h3>How do I place an order?</h3>
                 <p>Browse products from the Shop menu, add items to your cart, and complete checkout with your shipping and payment details.</p>
               </div>
@@ -718,7 +718,7 @@ const CustomerDashboard = () => {
               className="export-btn"
               onClick={() => navigate('/products')}
             >
-              📥 Continue Shopping
+              ðŸ“¥ Continue Shopping
             </button>
           </div>
 
@@ -770,7 +770,7 @@ const CustomerDashboard = () => {
                   <div className="order-card-header">
                     <div className="order-info">
                       <h3 className="order-title">Order ID: {order.id}</h3>
-                      <p className="order-date">📅 {new Date(order.created_at).toLocaleDateString()}</p>
+                      <p className="order-date">ðŸ“… {new Date(order.created_at).toLocaleDateString()}</p>
                     </div>
                     <span 
                       className="status-badge"
@@ -799,7 +799,7 @@ const CustomerDashboard = () => {
                       </div>
                       <div className="detail-item">
                         <label>Shipping</label>
-                        <p>{order.shipping_address || '—'}</p>
+                        <p>{order.shipping_address || 'â€”'}</p>
                       </div>
                       {order.status === 'returned' && (
                         <>
@@ -836,18 +836,18 @@ const CustomerDashboard = () => {
                       onClick={() => handleViewDetails(order)}
                       disabled={isButtonLoading(order.id, 'details')}
                     >
-                      {isButtonLoading(order.id, 'details') ? '⏳ Loading...' : '📋 View Details'}
+                      {isButtonLoading(order.id, 'details') ? 'â³ Loading...' : 'ðŸ“‹ View Details'}
                     </button>
                     <button
                       className="action-btn secondary-btn"
                       onClick={() => handleDownloadInvoice(order)}
                       disabled={isButtonLoading(order.id, 'invoice')}
                     >
-                      {isButtonLoading(order.id, 'invoice') ? '⏳ Preparing...' : '📥 Download Invoice'}
+                      {isButtonLoading(order.id, 'invoice') ? 'â³ Preparing...' : 'ðŸ“¥ Download Invoice'}
                     </button>
                     {order.status === 'shipped' && (
                       <button className="action-btn secondary-btn">
-                        📍 Track Order
+                        ðŸ“ Track Order
                       </button>
                     )}
                     {order.status === 'delivered' && (
@@ -856,7 +856,7 @@ const CustomerDashboard = () => {
                         onClick={() => openReturnModal(order)}
                         disabled={isButtonLoading(order.id, 'return')}
                       >
-                        ↩ Return Order
+                        â†© Return Order
                       </button>
                     )}
                     {order.status === 'delivered' && (
@@ -866,8 +866,8 @@ const CustomerDashboard = () => {
                         disabled={!!reviewsByOrder[order.id]}
                       >
                         {reviewsByOrder[order.id]
-                          ? `⭐ You rated ${reviewsByOrder[order.id].rating}/5`
-                          : '⭐ Leave Review'}
+                          ? `â­ You rated ${reviewsByOrder[order.id].rating}/5`
+                          : 'â­ Leave Review'}
                       </button>
                     )}
                     {['pending', 'confirmed'].includes(order.status) && (
@@ -876,7 +876,7 @@ const CustomerDashboard = () => {
                         onClick={() => handleCancelOrder(order)}
                         disabled={isButtonLoading(order.id, 'cancel')}
                       >
-                        {isButtonLoading(order.id, 'cancel') ? '⏳ Cancelling...' : '✕ Cancel Order'}
+                        {isButtonLoading(order.id, 'cancel') ? 'â³ Cancelling...' : 'âœ• Cancel Order'}
                       </button>
                     )}
                   </div>
@@ -884,14 +884,14 @@ const CustomerDashboard = () => {
               ))
             ) : (
               <div className="no-orders">
-                <div className="no-orders-icon">📦</div>
+                <div className="no-orders-icon">ðŸ“¦</div>
                 <h3>No Orders Found</h3>
                 <p>You haven't placed any orders yet. Start shopping now!</p>
                 <button 
                   className="start-shopping-btn"
                   onClick={() => navigate('/products')}
                 >
-                  🛍️ Start Shopping
+                  ðŸ›ï¸ Start Shopping
                 </button>
               </div>
             )}
@@ -912,7 +912,7 @@ const CustomerDashboard = () => {
                   onClick={() => setIsDetailsOpen(false)}
                   disabled={detailsLoading}
                 >
-                  ×
+                  Ã—
                 </button>
               </div>
 
@@ -1045,7 +1045,7 @@ const CustomerDashboard = () => {
                   onClick={() => setIsReviewOpen(false)}
                   disabled={reviewSubmitting}
                 >
-                  ×
+                  Ã—
                 </button>
               </div>
 
@@ -1064,7 +1064,7 @@ const CustomerDashboard = () => {
                           onClick={() => setSelectedRating(star)}
                           aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
                         >
-                          ★
+                          â˜…
                         </button>
                       );
                     })}
@@ -1121,7 +1121,7 @@ const CustomerDashboard = () => {
                   onClick={closeReturnModal}
                   disabled={returnSubmitting}
                 >
-                  ×
+                  Ã—
                 </button>
               </div>
 
@@ -1204,3 +1204,4 @@ const CustomerDashboard = () => {
 };
 
 export default CustomerDashboard;
+

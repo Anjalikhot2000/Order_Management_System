@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -29,7 +29,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/orders');
+      const response = await axios.get('/api/orders');
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -52,14 +52,14 @@ const Orders = () => {
   const refundStatusLabel = (order) => order.refund_status || 'Not Initiated';
 
   const loadOrderDetails = async (orderId) => {
-    const response = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
+    const response = await axios.get(`/api/orders/${orderId}`);
     return response.data;
   };
 
   const handleDelete = async (orderId) => {
     if (window.confirm('Are you sure you want to delete this order?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/orders/${orderId}`);
+        await axios.delete(`/api/orders/${orderId}`);
         setOrders(orders.filter(order => order.id !== orderId));
         alert('Order deleted successfully');
       } catch (error) {
@@ -98,7 +98,7 @@ const Orders = () => {
 
     try {
       setAdminActionLoading(true);
-      await axios.put(`http://localhost:5000/api/orders/${editingOrder.id}/approve`);
+      await axios.put(`/api/orders/${editingOrder.id}/approve`);
       await fetchOrders();
       await refreshEditingOrder(editingOrder.id);
       alert('Return approved and refund moved to Processing.');
@@ -120,7 +120,7 @@ const Orders = () => {
 
     try {
       setAdminActionLoading(true);
-      await axios.put(`http://localhost:5000/api/orders/${editingOrder.id}/reject`, {
+      await axios.put(`/api/orders/${editingOrder.id}/reject`, {
         admin_message: adminMessageInput.trim()
       });
       await fetchOrders();
@@ -140,7 +140,7 @@ const Orders = () => {
 
     try {
       setAdminActionLoading(true);
-      await axios.put(`http://localhost:5000/api/orders/${editingOrder.id}/refund-complete`);
+      await axios.put(`/api/orders/${editingOrder.id}/refund-complete`);
       await fetchOrders();
       await refreshEditingOrder(editingOrder.id);
       alert('Refund marked as Completed.');
@@ -154,7 +154,7 @@ const Orders = () => {
 
   const handleSaveEdit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/orders/${editingOrder.id}`, {
+      await axios.put(`/api/orders/${editingOrder.id}`, {
         status: formData.status,
         payment_status: formData.payment_status
       });
@@ -220,36 +220,36 @@ const Orders = () => {
             className={`sidebar-item ${activeMenu === 'Dashboard' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Dashboard')}
           >
-            📊 Dashboard
+            ðŸ“Š Dashboard
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Orders' ? 'active' : ''}`}
           >
-            📦 Orders
+            ðŸ“¦ Orders
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Products' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Products')}
           >
-            🛍️ Products
+            ðŸ›ï¸ Products
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Customers' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Customers')}
           >
-            👥 Customers
+            ðŸ‘¥ Customers
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Reports' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Reports')}
           >
-            📈 Reports
+            ðŸ“ˆ Reports
           </button>
           <button 
             className={`sidebar-item ${activeMenu === 'Settings' ? 'active' : ''}`}
             onClick={() => handleMenuClick('Settings')}
           >
-            ⚙️ Settings
+            âš™ï¸ Settings
           </button>
         </nav>
       </aside>
@@ -272,7 +272,7 @@ const Orders = () => {
         <section className="orders-section-pro">
           <div className="filters-card">
             <div className="search-box">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon">ðŸ”</span>
               <input 
                 type="text"
                 placeholder="Search by Order ID or Customer name..."
@@ -351,14 +351,14 @@ const Orders = () => {
                           disabled={editLoading}
                           title="Edit Order"
                         >
-                          {editLoading ? '⏳' : '✎'}
+                          {editLoading ? 'â³' : 'âœŽ'}
                         </button>
                         <button 
                           className="action-btn delete-btn-pro"
                           onClick={() => handleDelete(order.id)}
                           title="Delete Order"
                         >
-                          🗑
+                          ðŸ—‘
                         </button>
                       </td>
                     </tr>
@@ -386,7 +386,7 @@ const Orders = () => {
                 className="modal-close-pro"
                 onClick={() => setShowEditModal(false)}
               >
-                ✕
+                âœ•
               </button>
             </div>
             
@@ -592,3 +592,4 @@ const Orders = () => {
 };
 
 export default Orders;
+

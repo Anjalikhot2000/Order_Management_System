@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+﻿import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -155,7 +155,7 @@ const Checkout = () => {
       console.log('[Checkout][Debug] Raw cart from localStorage:', savedCart);
       setCart(savedCart);
 
-      const productsResponse = await axios.get('http://localhost:5000/api/products');
+      const productsResponse = await axios.get('/api/products');
       const stockMap = productsResponse.data.reduce((acc, product) => {
         acc[product.id] = Number.parseInt(product.stock_quantity || 0, 10) || 0;
         return acc;
@@ -356,7 +356,7 @@ const Checkout = () => {
       console.log('[Checkout][Debug] Order payload:', orderData);
       console.log('[Checkout][Debug] Selected payment method:', paymentMethod);
 
-      const response = await axios.post('http://localhost:5000/api/orders', orderData);
+      const response = await axios.post('/api/orders', orderData);
 
       const paymentResult = await simulatePaymentSuccess();
       if (!paymentResult.success) {
