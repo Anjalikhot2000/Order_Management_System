@@ -42,10 +42,15 @@ Set these in Render service settings:
 
 Use values from Aiven connection details:
 
-- DATABASE_URL: service URI from Aiven, e.g. mysql://user:pass@host:port/defaultdb?ssl-mode=REQUIRED
+- DATABASE_URL: service URI from Aiven and ensure DB path is `order_management`, e.g. mysql://user:pass@host:port/order_management?ssl-mode=REQUIRED
 - DB_SSL: true
 - DB_SSL_MODE: REQUIRED
+- DB_SSL_REJECT_UNAUTHORIZED: true (after setting CA cert)
 - DB_AUTO_CREATE: false
+
+Important:
+- Do not use `/defaultdb` in `DATABASE_URL` for this app.
+- Set `DB_NAME=order_management` as a fallback when `DATABASE_URL` is not used.
 
 If connection fails with certificate validation, add Aiven CA cert:
 
