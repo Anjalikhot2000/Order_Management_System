@@ -13,8 +13,13 @@ const getUrlSslEnabled = (parsedUrl) => {
 };
 
 const normalizeMultiline = (value) => (value ? String(value).replace(/\\n/g, '\n') : '');
+const isLoopbackHost = (value) => ['localhost', '127.0.0.1'].includes(String(value || '').toLowerCase());
 
 const buildSslOptions = () => {
+    if (isLoopbackHost(process.env.DB_HOST)) {
+        return undefined;
+    }
+
     const sslRequired = isTruthy(process.env.DB_SSL) || isTruthy(process.env.DB_SSL_MODE);
     if (!sslRequired) {
         return undefined;
@@ -39,7 +44,10 @@ const buildSslOptions = () => {
 
 const getConnectionConfig = () => {
     const databaseUrl = process.env.DATABASE_URL || process.env.MYSQL_URL || '';
-    if (databaseUrl) {
+    const preferExplicitLocalConfig = process.env.NODE_ENV !== 'production'
+        && isLoopbackHost(process.env.DB_HOST);
+
+    if (databaseUrl && !preferExplicitLocalConfig) {
         const parsed = new URL(databaseUrl);
         const sslEnabled = isTruthy(process.env.DB_SSL)
             || getUrlSslEnabled(parsed)

@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  cacheDir: 'C:/Users/Anjali/AppData/Local/Temp/order-management-vite-cache',
   server: {
     proxy: {
       '/api': {

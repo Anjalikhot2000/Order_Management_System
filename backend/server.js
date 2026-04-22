@@ -18,7 +18,17 @@ const parseAllowedOrigins = () => {
         .filter(Boolean);
 };
 
+const isLoopbackOrigin = (origin) => {
+    try {
+        const { hostname } = new URL(origin);
+        return hostname === 'localhost' || hostname === '127.0.0.1';
+    } catch (error) {
+        return false;
+    }
+};
+
 const allowedOrigins = parseAllowedOrigins();
+const allowLoopbackPorts = allowedOrigins.some(isLoopbackOrigin);
 
 const corsOptions = {
     origin: (origin, callback) => {
@@ -27,7 +37,11 @@ const corsOptions = {
             return callback(null, true);
         }
 
-        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        if (
+            allowedOrigins.length === 0
+            || allowedOrigins.includes(origin)
+            || (allowLoopbackPorts && isLoopbackOrigin(origin))
+        ) {
             return callback(null, true);
         }
 
